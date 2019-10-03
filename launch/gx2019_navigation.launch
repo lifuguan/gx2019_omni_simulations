@@ -12,6 +12,6 @@
   <include file="$(find gx2019_omni_simulations)/launch/amcl.launch"/>
 
   <!-- move_base -->
-  <include file="$(find gx2019_omni_simulations)/launch/move_base.launch"/>
+  <!-- <include file="$(find gx2019_omni_simulations)/launch/move_base.launch"/> -->
 
 </launch>
