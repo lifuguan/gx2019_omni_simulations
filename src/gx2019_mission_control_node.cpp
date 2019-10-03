@@ -34,12 +34,15 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "gx2019_mission_control_node");
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe<std_msgs::String>("qrcode_message", 10, qrcode_message_callback);
+    ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
 
     tf::TransformBroadcaster goal_frame_broadcaster;
     tf::TransformListener goal_to_car_listener;
     tf::StampedTransform goal_to_car_stamped;
 
-    ros::Rate rate(1.0);
+    geometry_msgs::Twist cmd_vel;
+
+    ros::Rate rate(5.0);
     while (nh.ok())
     {
 
@@ -54,9 +57,21 @@ int main(int argc, char **argv)
             double yaw, pitch, roll;
             tf::Matrix3x3(goal_to_car_stamped.getRotation()).getEulerYPR(yaw, pitch, roll);
 
-            double x, y, rotation;
-            x = -goal_to_car_stamped.getOrigin().y();  y = goal_to_car_stamped.getOrigin().x();  rotation = yaw;
-            
+            double x, y, rotation, dst;
+            x = -goal_to_car_stamped.getOrigin().y();
+            y = goal_to_car_stamped.getOrigin().x();
+            rotation = yaw;
+            dst = sqrt(pow(x, 2) + pow(y, 2));
+            if (dst <= 0.05)
+            {
+                cmd_vel.linear.x = 0;
+                cmd_vel.linear.y = 0;
+            }
+            else
+            {
+                cmd_vel.linear.x = 0.5 * tanh(dst) * (x / dst);
+                cmd_vel.linear.y = 0.5 * tanh(dst) * (y / dst);
+            }
             ROS_INFO("%f %f %f", x, y, rotation);
         }
         catch (tf::TransformException &ex)
@@ -67,6 +82,7 @@ int main(int argc, char **argv)
             // vel_msg.angular.z = 0;
         }
 
+        pub.publish(cmd_vel);
         ros::spinOnce();
         rate.sleep();
     }
