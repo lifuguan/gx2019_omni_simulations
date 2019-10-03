@@ -15,9 +15,7 @@ tf::Transform goals[2][4] =
          tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-2.0, -1.68, 0))}};
 
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
-tf::Transform qrcode_point(tf::Quaternion(0, 0, -1.0, 1), tf::Vector3(1.5, 0.8, 0));
-
-tf::TransformListener goal_to_car_listener; tf::StampedTransform goal_to_car_stamped;
+tf::Transform qrcode_point(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.8, -1.5, 0));
 
 int qrcode_message[2][4];
 
@@ -38,14 +36,39 @@ int main(int argc, char **argv)
     ros::Subscriber sub = nh.subscribe<std_msgs::String>("qrcode_message", 10, qrcode_message_callback);
 
     tf::TransformBroadcaster goal_frame_broadcaster;
-    ros::Rate rate(10.0);
+    tf::TransformListener goal_to_car_listener;
+    tf::StampedTransform goal_to_car_stamped;
+
+    ros::Rate rate(1.0);
     while (nh.ok())
     {
-        goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "map", "goal"));
 
-        goal_to_car_listener.lookupTransform("/base_link", "/goal", ros::Time(0), goal_to_car_stamped);
-        ROS_INFO("%d %d ", goal_to_car_stamped.getOrigin().x(), goal_to_car_stamped.getOrigin().y());
+        goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "goal", "map"));
+
+        try
+        {
+
+            goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
+
+            //四元数转RPY ， 使用yaw
+            double yaw, pitch, roll;
+            tf::Matrix3x3(goal_to_car_stamped.getRotation()).getEulerYPR(yaw, pitch, roll);
+
+            double x, y, rotation;
+            x = -goal_to_car_stamped.getOrigin().y();  y = goal_to_car_stamped.getOrigin().x();  rotation = yaw;
+            
+            ROS_INFO("%f %f %f", x, y, rotation);
+        }
+        catch (tf::TransformException &ex)
+        {
+            ROS_ERROR("%s", ex.what());
+            ros::Duration(1.0).sleep();
+            // vel_msg.linear.x = 0;
+            // vel_msg.angular.z = 0;
+        }
+
         ros::spinOnce();
+        rate.sleep();
     }
 
     return 0;
