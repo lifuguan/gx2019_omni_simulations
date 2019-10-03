@@ -1,16 +1,16 @@
 <launch>
-     <node name="map_server" pkg="map_server" type="map_server" args="$(find gx2019_omini_simulations)/map/map.yaml"/>
+     <node name="map_server" pkg="map_server" type="map_server" args="$(find gx2019_omni_simulations)/map/map.yaml"/>
      
-     <include file="$(find gx2019_omini_simulations)/launch/qrcode_detecter_simulations.launch" />
+     <include file="$(find gx2019_omni_simulations)/launch/qrcode_detecter_simulations.launch" />
      
      <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
      
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-          <rosparam file="$(find gx2019_omini_simulations)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
-          <rosparam file="$(find gx2019_omini_simulations)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
-          <rosparam file="$(find gx2019_omini_simulations)/config/local_costmap_params.yaml" command="load" />
-          <rosparam file="$(find gx2019_omini_simulations)/config/global_costmap_params.yaml" command="load" />
-          <rosparam file="$(find gx2019_omini_simulations)/config/base_local_planner_params.yaml" command="load" />
+          <rosparam file="$(find gx2019_omni_simulations)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+          <rosparam file="$(find gx2019_omni_simulations)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+          <rosparam file="$(find gx2019_omni_simulations)/config/local_costmap_params.yaml" command="load" />
+          <rosparam file="$(find gx2019_omni_simulations)/config/global_costmap_params.yaml" command="load" />
+          <rosparam file="$(find gx2019_omni_simulations)/config/base_local_planner_params.yaml" command="load" />
      </node>
 </launch>
 

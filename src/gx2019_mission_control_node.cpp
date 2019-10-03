@@ -17,6 +17,8 @@ tf::Transform goals[2][4] =
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
 tf::Transform qrcode_point(tf::Quaternion(0, 0, -1.0, 1), tf::Vector3(1.5, 0.8, 0));
 
+tf::TransformListener goal_to_car_listener; tf::StampedTransform goal_to_car_stamped;
+
 int qrcode_message[2][4];
 
 void qrcode_message_callback(const std_msgs::String qrcode_message_)
@@ -40,8 +42,9 @@ int main(int argc, char **argv)
     while (nh.ok())
     {
         goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "map", "goal"));
-        
-        
+
+        goal_to_car_listener.lookupTransform("/base_link", "/goal", ros::Time(0), goal_to_car_stamped);
+        ROS_INFO("%d %d ", goal_to_car_stamped.getOrigin().x(), goal_to_car_stamped.getOrigin().y());
         ros::spinOnce();
     }
 
