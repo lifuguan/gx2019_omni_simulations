@@ -1,3 +1,10 @@
+/*
+ * @Description: 负责收取qrcode的信息， 设置导航目标点
+ * @Author: lifuguan
+ * @Date: 2019-10-03 17:21:04
+ * @LastEditTime: 2019-10-08 20:07:08
+ * @LastEditors: Please set LastEditors
+ */
 
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
@@ -7,17 +14,17 @@
 
 tf::Transform goals[2][4] =
     {
-        {tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.86, -2.0, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1.05, -2.0, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1.25, -2.0, 0))},
-        {tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-2.0, -1.36, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-2.0, -1.51, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-2.0, -1.68, 0))}};
+        {tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -0.86, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -1.05, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -1.25, 0))},
+        {tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.36, -2.0, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.51, -2.0, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.68, -2.0, 0))}};
 
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
-tf::Transform qrcode_point(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.8, -1.5, 0));
+tf::Transform qrcode_point(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.8, -1.8, 0));
 
-int qrcode_message[2][4];
+int qrcode_message[2][4] = {0};
 
 void qrcode_message_callback(const std_msgs::String qrcode_message_)
 {
@@ -45,12 +52,18 @@ int main(int argc, char **argv)
     ros::Rate rate(5.0);
     while (nh.ok())
     {
-
-        goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "goal", "map"));
-
+        if (qrcode_message[0][0] == 0)
+        {
+            goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "goal", "map"));
+        }
+        else
+        {
+            goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[0][0], ros::Time::now(), "goal", "map"));
+        }
+        
         try
         {
-
+            
             goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
 
             //四元数转RPY ， 使用yaw
@@ -62,15 +75,18 @@ int main(int argc, char **argv)
             y = goal_to_car_stamped.getOrigin().x();
             rotation = yaw;
             dst = sqrt(pow(x, 2) + pow(y, 2));
-            if (dst <= 0.05)
+            if (dst <= 0.02)
             {
                 cmd_vel.linear.x = 0;
                 cmd_vel.linear.y = 0;
+                cmd_vel.angular.z = 0;
             }
             else
             {
-                cmd_vel.linear.x = 0.5 * tanh(dst) * (x / dst);
-                cmd_vel.linear.y = 0.5 * tanh(dst) * (y / dst);
+                cmd_vel.linear.x = 0.3 * tanh(dst) * (x / dst);
+                cmd_vel.linear.y = 0.3 * tanh(dst) * (y / dst);
+                // cmd_vel.angular.z = -0.7 * rotation;
+                // cmd_vel.angular.z = atan2(x, y);
             }
             ROS_INFO("%f %f %f", x, y, rotation);
         }
@@ -78,7 +94,8 @@ int main(int argc, char **argv)
         {
             ROS_ERROR("%s", ex.what());
             ros::Duration(1.0).sleep();
-            // vel_msg.linear.x = 0;
+            cmd_vel.linear.x = 0;
+            cmd_vel.linear.y = 0;
             // vel_msg.angular.z = 0;
         }
 
