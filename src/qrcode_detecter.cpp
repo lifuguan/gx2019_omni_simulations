@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-10-03 15:21:38
+ * @LastEditTime: 2019-10-11 18:19:42
+ * @LastEditors: Please set LastEditors
+ */
 #include <visp3/core/vpPixelMeterConversion.h>
 #include <visp3/detection/vpDetectorQRCode.h>
 #include <visp3/gui/vpDisplayGDI.h>
@@ -83,7 +90,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
   {
 
     frame = cv_bridge::toCvShare(msg, "bgr8")->image;
-
     // 第一次进入回调 ， 初始化现实界面
     if (time_ == 1)
     {

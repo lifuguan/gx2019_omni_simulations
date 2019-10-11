@@ -163,8 +163,7 @@ include_directories(
 if(OpenCV_FOUND)
     add_executable(gx2019_cylinder_localization_node src/gx2019_cylinder_localization_node.cpp)
     target_link_libraries(gx2019_cylinder_localization_node ${catkin_LIBRARIES})
-    target_link_libraries(gx2019_cylinder_localization_node ${OpenCV_LIBS} )
-    target_link_libraries(gx2019_cylinder_localization_node ${VISP_LIBRARIES}) 
+    target_link_libraries(gx2019_cylinder_localization_node ${OpenCV_LIBS} ) 
 
     add_executable(qrcode_detecter src/qrcode_detecter.cpp)
     target_link_libraries(qrcode_detecter ${catkin_LIBRARIES})
