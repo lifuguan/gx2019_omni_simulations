@@ -2,7 +2,7 @@
  * @Description: 负责收取qrcode的信息， 设置导航目标点
  * @Author: lifuguan
  * @Date: 2019-10-03 17:21:04
- * @LastEditTime: 2019-10-11 22:13:27
+ * @LastEditTime: 2019-10-12 21:34:55
  * @LastEditors: Please set LastEditors
  */
 
@@ -12,6 +12,8 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/String.h>
+#include <gx2019_omni_simulations/arm_transport.h>
+#include <gx2019_omni_simulations/cv_mission_type.h>
 
 using namespace std;
 
@@ -41,6 +43,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe<std_msgs::String>("qrcode_message", 10, qrcode_message_callback);
     ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
+    ros::Publisher cv_mission_pub = nh.advertise<gx2019_omni_simulations::cv_mission_type>("cv_mission_topic", 100);
 
     tf::TransformBroadcaster goal_frame_broadcaster;
     tf::TransformListener goal_to_car_listener;
@@ -60,13 +63,20 @@ int main(int argc, char **argv)
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
 
                 double dst = cmd_vel_calculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst);
 
-                if (dst <= 1.0)
+                gx2019_omni_simulations::cv_mission_type cv_mission_type;
+                if (dst <= 0.7 && dst >= 0.2)
                 {
                     // 通讯， ， 打开识别，，转机械臂
+                    cv_mission_type.cv_mission_type = 1;
                 }
-                
-                
+                else
+                {
+                    // 啥都不做
+                    cv_mission_type.cv_mission_type = 0;
+                }
+                cv_mission_pub.publish(cv_mission_type);
             }
             catch (tf::TransformException &ex)
             {
@@ -127,7 +137,6 @@ double cmd_vel_calculate(tf::StampedTransform goal_to_car_stamped)
         // cmd_vel.angular.z = -0.7 * rotation;
         // cmd_vel.angular.z = atan2(x, y);
     }
-    ROS_INFO("%f %f %f", x, y, rotation);
 
     return dst;
 }
