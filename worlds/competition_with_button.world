@@ -269,10 +269,10 @@
       <static>1</static>
     </model>
     <state world_name='default'>
-      <sim_time>498 223000000</sim_time>
-      <real_time>41 893496002</real_time>
-      <wall_time>1570108146 886592954</wall_time>
-      <iterations>41789</iterations>
+      <sim_time>715 380000000</sim_time>
+      <real_time>218 257803593</real_time>
+      <wall_time>1570885373 370618566</wall_time>
+      <iterations>217157</iterations>
       <model name='BlueButton'>
         <pose frame=''>1.25067 2.34834 0.049995 0 -0 5e-06</pose>
         <scale>1 1 1</scale>
@@ -284,50 +284,50 @@
         </link>
       </model>
       <model name='BlueButton_0'>
-        <pose frame=''>2.22088 1.68095 0.049996 0 -0 1e-05</pose>
+        <pose frame=''>1.35 0.08 0.049995 1e-06 -1e-06 2e-05</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>2.22088 1.68095 0.049996 0 -0 1e-05</pose>
+          <pose frame=''>1.35 0.08 0.049995 1e-06 -1e-06 2e-05</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='GreenButton'>
-        <pose frame=''>1.05463 2.35249 0.049996 0 -0 5e-06</pose>
+        <pose frame=''>1.05463 2.35249 0.049996 -1e-06 -1e-06 4e-06</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>1.05463 2.35249 0.049996 0 -0 5e-06</pose>
+          <pose frame=''>1.05463 2.35249 0.049996 -1e-06 -1e-06 4e-06</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='GreenButton_0'>
-        <pose frame=''>2.21913 1.51611 0.049995 0 -0 5e-06</pose>
+        <pose frame=''>1.05 0.08 0.049993 0 -0 1.2e-05</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>2.21913 1.51611 0.049995 0 -0 5e-06</pose>
+          <pose frame=''>1.05 0.08 0.049993 0 -0 1.2e-05</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='RedButton'>
-        <pose frame=''>0.867512 2.35193 0.049994 0 -0 9e-06</pose>
+        <pose frame=''>0.867512 2.35193 0.049994 -1e-06 -0 1.6e-05</pose>
         <scale>1 1 1</scale>
         <link name='link_1'>
-          <pose frame=''>0.867512 2.35193 0.049994 0 -0 9e-06</pose>
+          <pose frame=''>0.867512 2.35193 0.049994 -1e-06 -0 1.6e-05</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='RedButton_0'>
-        <pose frame=''>2.21698 1.36418 0.049995 1e-06 -0 7e-06</pose>
+        <pose frame=''>1.2 0.08 0.049995 0 -0 1e-06</pose>
         <scale>1 1 1</scale>
         <link name='link_1'>
-          <pose frame=''>2.21698 1.36418 0.049995 1e-06 -0 7e-06</pose>
+          <pose frame=''>1.2 0.08 0.049995 0 -0 1e-06</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
@@ -344,13 +344,13 @@
         </link>
       </model>
       <model name='textured_shapes'>
-        <pose frame=''>2.4315 0.395194 0.1 1.80656 1.57079 1.79608</pose>
+        <pose frame=''>1.8 0.035347 0.1 -1.36873 1.57079 -3.00299</pose>
         <scale>1 1 1</scale>
         <link name='box'>
-          <pose frame=''>2.4315 0.395194 0.1 1.80656 1.57079 1.79608</pose>
+          <pose frame=''>1.8 0.035347 0.1 -1.36873 1.57079 -3.00299</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.022636 0.09475 -0.254702 -0.947499 -0.22636 -0</acceleration>
-          <wrench>-0.022636 0.09475 -0.254702 0 -0 0</wrench>
+          <acceleration>-0.096042 -0.009091 -0.177517 0.090931 -0.960421 -1.9e-05</acceleration>
+          <wrench>-0.096042 -0.009091 -0.177517 0 -0 0</wrench>
         </link>
       </model>
       <model name='wall'>
@@ -387,7 +387,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>1.76259 0.429908 1.14646 0 1.0378 0.188768</pose>
+        <pose frame=''>-0.095793 0.870811 1.3887 0 0.557798 -0.351231</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
