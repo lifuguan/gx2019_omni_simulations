@@ -60,6 +60,7 @@ pcl_ros
 add_message_files(
   FILES
   arm_transport.msg
+  cv_mission_type.msg
 )
 
 ## Generate services in the 'srv' folder
