@@ -38,6 +38,7 @@
                 "/home/robomaster/catkin_ws/src/turtlebot3_simulations/turtlebot3_fake/include",
                 "/home/robomaster/catkin_ws/src/turtlebot3_simulations/turtlebot3_gazebo/include",
                 "/home/robomaster/catkin_ws/src/navigation/voxel_grid/include",
+                "/home/robomaster/catkin_ws/devel/include/arm_transport.h",
                 "/usr/include"
             ],
             "name": "Linux",
