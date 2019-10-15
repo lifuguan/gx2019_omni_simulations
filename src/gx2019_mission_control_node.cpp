@@ -2,7 +2,7 @@
  * @Description: 负责收取qrcode的信息， 设置导航目标点
  * @Author: lifuguan
  * @Date: 2019-10-03 17:21:04
- * @LastEditTime: 2019-10-12 21:34:55
+ * @LastEditTime: 2019-10-15 21:43:29
  * @LastEditors: Please set LastEditors
  */
 
@@ -17,34 +17,47 @@
 
 using namespace std;
 
-tf::Transform goals[2][4] =
+tf::Transform goals[3][4] =
     {
+        // 成品区
         {tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -0.86, 0)),
          tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -1.05, 0)),
          tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(2.0, -1.25, 0))},
+        // 加工区
         {tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.36, -2.0, 0)),
          tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.51, -2.0, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.68, -2.0, 0))}};
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(1.68, -2.0, 0))},
+        // 物料区 从右往左
+        {tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.3, -1.05, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.3, -1.20, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.3, -1.35, 0))}};
 
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
 tf::Transform qrcode_point(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.8, -1.8, 0));
 
 int qrcode_message[2][4] = {0};
 
+int material_queue[4];
+int step = 0;
+
+bool check_if_mission_reviced = false;
+
 geometry_msgs::Twist cmd_vel;
 
-void qrcode_message_callback(const std_msgs::String qrcode_message_);
+void qrcodeMessageCallback(const std_msgs::String qrcode_message_);
 
-double cmd_vel_calculate(tf::StampedTransform goal_to_car_stamped);
+void cvMaterialQueueSub(const gx2019_omni_simulations::cv_mission_type &msg);
+
+double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped);
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "gx2019_mission_control_node");
     ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe<std_msgs::String>("qrcode_message", 10, qrcode_message_callback);
+    ros::Subscriber sub = nh.subscribe<std_msgs::String>("qrcode_message", 10, qrcodeMessageCallback);
     ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
     ros::Publisher cv_mission_pub = nh.advertise<gx2019_omni_simulations::cv_mission_type>("cv_mission_topic", 100);
-
+    ros::Subscriber cv_material_queue_sub = nh.subscribe("cv_material_queue", 5, cvMaterialQueueSub);
     tf::TransformBroadcaster goal_frame_broadcaster;
     tf::TransformListener goal_to_car_listener;
     tf::StampedTransform goal_to_car_stamped;
@@ -62,13 +75,12 @@ int main(int argc, char **argv)
             {
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
 
-                double dst = cmd_vel_calculate(goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
                 ROS_INFO("%f", dst);
-
                 gx2019_omni_simulations::cv_mission_type cv_mission_type;
-                if (dst <= 0.7 && dst >= 0.2)
+                if (dst <= 0.7 && dst >= 0.5 && check_if_mission_reviced == false)
                 {
-                    // 通讯， ， 打开识别，，转机械臂
+                    // 通讯， 打开识别
                     cv_mission_type.cv_mission_type = 1;
                 }
                 else
@@ -89,11 +101,11 @@ int main(int argc, char **argv)
         //识别到二维码之后
         else
         {
-            goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[0][0], ros::Time::now(), "goal", "map"));
+            goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][0] - 1]], ros::Time::now(), "goal", "map"));
 
             goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
 
-            cmd_vel_calculate(goal_to_car_stamped);
+            cmdVelCalculate(goal_to_car_stamped);
         }
         pub.publish(cmd_vel);
         ros::spinOnce();
@@ -103,17 +115,26 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void qrcode_message_callback(const std_msgs::String qrcode_message_)
+void qrcodeMessageCallback(const std_msgs::String qrcode_message_)
 {
     for (int i = 0; i < 3; i++)
     {
         qrcode_message[0][i] = qrcode_message_.data[i] - 48;
         qrcode_message[1][i] = qrcode_message_.data[4 + i] - 48;
     }
-    ROS_INFO("%d %d %d \n %d %d %d", qrcode_message[0][0], qrcode_message[0][1], qrcode_message[0][2], qrcode_message[1][0], qrcode_message[1][1], qrcode_message[1][2]);
 }
 
-double cmd_vel_calculate(tf::StampedTransform goal_to_car_stamped)
+void cvMaterialQueueSub(const gx2019_omni_simulations::cv_mission_type &msg)
+{
+    for (int i = 0; i < msg.material_queue.size(); i++)
+    {
+        material_queue[msg.material_queue[i]] = i;
+        cout << msg.material_queue[i] << endl;
+        check_if_mission_reviced = true;
+    }
+}
+
+double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
 {
     //四元数转RPY ， 使用yaw
     double yaw, pitch, roll;
