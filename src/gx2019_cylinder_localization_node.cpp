@@ -1,8 +1,8 @@
 /*
- * @Description: In User Settings Edit
+ * @Description: 色块识别和追踪
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-12 21:56:36
+ * @LastEditTime: 2019-10-15 21:45:15
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -35,15 +35,15 @@ enum TARGET_COLOR
     green
 };
 
+// 获取图像的回调函数
 void imageCallback(const sensor_msgs::ImageConstPtr &msg);
-
+// 获取视觉任务的回调函数
 void cvMissionCallBack(const gx2019_omni_simulations::cv_mission_type &msg);
-
-//初始化图形并圈出
+// 初始化图形
 string detect(vector<Point> cnts_single, vector<Point> &approx);
-
+// 圈出图形
 void drawLine(Mat &frame, string shape, vector<Point> &approx);
-
+// 找到色块的质心
 int findMaterialCentroid(Mat target_frame);
 
 int main(int argc, char **argv)
@@ -109,32 +109,32 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
 
         gx2019_omni_simulations::cv_mission_type cv_material_queue;
         // 排序
-        if (red_cX > blue_cX)
+        if (red_cX < blue_cX)
         {
-            if (blue_cX > green_cX) // red > blue > green
+            if (blue_cX < green_cX) // red < blue < green
             {
                 cv_material_queue.material_queue = {0, 1, 2};
             }
-            else if (green_cX > red_cX) // green > red > blue
+            else if (green_cX < red_cX) // green < red < blue
             {
                 cv_material_queue.material_queue = {2, 0, 1};
             }
-            else // red > green > blue
+            else // red < green < blue
             {
                 cv_material_queue.material_queue = {0, 2, 1};
             }
         }
-        else if (blue_cX > red_cX)
+        else if (blue_cX < red_cX)
         {
-            if (red_cX > green_cX) // blue > red > green
+            if (red_cX < green_cX) // blue < red < green
             {
                 cv_material_queue.material_queue = {1, 0, 2};
             }
-            else if (green_cX > blue_cX) // green > blue > red
+            else if (green_cX < blue_cX) // green < blue < red
             {
                 cv_material_queue.material_queue = {2, 1, 0};
             }
-            else // blue > green > red
+            else // blue < green < red
             {
                 cv_material_queue.material_queue = {1, 2, 0};
             }
