@@ -71,7 +71,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.28 0.17 0.05"/>
+        <box size="0.2 0.2 0.05"/>
       </geometry>
       <material name="White"/>
     </visual>
@@ -119,7 +119,7 @@
   <joint name="front_right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="front_right_wheel"/>
-    <origin rpy="0 0 0" xyz="0.10 -0.095 0.0"/>
+    <origin rpy="0 0 0" xyz="0.07 -0.095 0.0"/>
     <axis rpy="0  0" xyz="0 1 0"/>
     <limit effort="100" velocity="100"/>
     <joint_properties damping="0.0" friction="0.0"/>
@@ -166,7 +166,7 @@
   <joint name="front_left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="front_left_wheel"/>
-    <origin rpy="0 0 0" xyz="0.10 0.095 0.0"/>
+    <origin rpy="0 0 0" xyz="0.07 0.095 0.0"/>
     <axis rpy="0  0" xyz="0 1 0"/>
     <limit effort="100" velocity="100"/>
     <joint_properties damping="0.0" friction="0.0"/>
@@ -213,7 +213,7 @@
   <joint name="back_right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="back_right_wheel"/>
-    <origin rpy="0 0 0" xyz="-0.10 -0.095 0.0"/>
+    <origin rpy="0 0 0" xyz="-0.07 -0.095 0.0"/>
     <axis rpy="0  0" xyz="0 1 0"/>
     <limit effort="100" velocity="100"/>
     <joint_properties damping="0.0" friction="0.0"/>
@@ -260,7 +260,7 @@
   <joint name="back_left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="back_left_wheel"/>
-    <origin rpy="0 0 0" xyz="-0.10 0.095 0.0"/>
+    <origin rpy="0 0 0" xyz="-0.07 0.095 0.0"/>
     <axis rpy="0  0" xyz="0 1 0"/>
     <limit effort="100" velocity="100"/>
     <joint_properties damping="0.0" friction="0.0"/>
@@ -294,7 +294,7 @@
   <!-- Hokuyo Laser -->
   <joint name="hokuyo_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0.125 0 0.0325" rpy="0 0 0"/>
+    <origin xyz="0.065 0 0.0325" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="hokuyo_link"/>
   </joint>
