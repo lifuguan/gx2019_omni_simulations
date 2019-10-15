@@ -2,7 +2,7 @@
  * @Description: 负责收取qrcode的信息， 设置导航目标点
  * @Author: lifuguan
  * @Date: 2019-10-03 17:21:04
- * @LastEditTime: 2019-10-15 21:43:29
+ * @LastEditTime: 2019-10-15 21:53:59
  * @LastEditors: Please set LastEditors
  */
 
@@ -43,11 +43,11 @@ int step = 0;
 bool check_if_mission_reviced = false;
 
 geometry_msgs::Twist cmd_vel;
-
+// 接受二维码任务信息
 void qrcodeMessageCallback(const std_msgs::String qrcode_message_);
-
+// 接收色块队列信息并与坐标信息对应
 void cvMaterialQueueSub(const gx2019_omni_simulations::cv_mission_type &msg);
-
+// 速度计算函数
 double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped);
 
 int main(int argc, char **argv)
@@ -78,6 +78,7 @@ int main(int argc, char **argv)
                 double dst = cmdVelCalculate(goal_to_car_stamped);
                 ROS_INFO("%f", dst);
                 gx2019_omni_simulations::cv_mission_type cv_mission_type;
+                // 如果没有达到目标距离 / 没有收到队列信息
                 if (dst <= 0.7 && dst >= 0.5 && check_if_mission_reviced == false)
                 {
                     // 通讯， 打开识别
@@ -124,12 +125,12 @@ void qrcodeMessageCallback(const std_msgs::String qrcode_message_)
     }
 }
 
+// 接收色块队列信息并与坐标信息对应
 void cvMaterialQueueSub(const gx2019_omni_simulations::cv_mission_type &msg)
 {
     for (int i = 0; i < msg.material_queue.size(); i++)
     {
         material_queue[msg.material_queue[i]] = i;
-        cout << msg.material_queue[i] << endl;
         check_if_mission_reviced = true;
     }
 }
