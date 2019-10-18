@@ -2,7 +2,7 @@
  * @Description: 色块识别和追踪
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-15 21:45:15
+ * @LastEditTime: 2019-10-18 16:07:28
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -25,8 +25,18 @@ Scalar green_range[3] = {Scalar(25, 43, 46), Scalar(95, 255, 255)};
 Scalar blue_range[3] = {Scalar(98, 102, 20), Scalar(130, 255, 255)};
 
 ros::Publisher cv_material_queue_pub;
+ros::Publisher arm_transport_pub;
 
+gx2019_omni_simulations::arm_transport arm_transport;
+
+/* cv的任务类型
+    0：啥也不干
+    1：识别色块排列
+    2：追踪指定色块
+    3：发送”抓”指令
+*/
 int cv_mission_type = 0;
+
 int target_color = 233;
 enum TARGET_COLOR
 {
@@ -53,6 +63,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber cv_mission_sub = nh.subscribe("cv_mission_topic", 10, cvMissionCallBack);
     cv_material_queue_pub = nh.advertise<gx2019_omni_simulations::cv_mission_type>("cv_material_queue", 10);
+    arm_transport_pub = nh.advertise<gx2019_omni_simulations::arm_transport>("arm_transport", 10);
 
     image_transport::ImageTransport it(nh);
     image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 1, imageCallback);
@@ -75,6 +86,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
     if (cv_mission_type == 0)
     {
         return;
+    }
+    else if (cv_mission_type == 3)
+    {
+        arm_transport.arm_moveit = true;
+        arm_transport.gimbal_rotate = 0;
+        arm_transport_pub.publish(arm_transport);
     }
 
     Mat frame_hsv, frame;
@@ -140,8 +157,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
             }
         }
         cv_material_queue_pub.publish(cv_material_queue);
-
-        ROS_INFO("%d  %d", blue_cX, green_cX);
     }
     // 抓取指定色块
     else if (cv_mission_type == 2)
@@ -204,6 +219,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                 putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
                 drawLine(frame, shape, approx);                                                                                                             //画矩形
                 imshow("OPENCV_WINDOW", frame);
+
+                arm_transport.arm_moveit = false;
+                arm_transport.gimbal_rotate = cX;
+                arm_transport_pub.publish(arm_transport);
             }
             else
             {

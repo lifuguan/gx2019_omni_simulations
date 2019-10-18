@@ -2,7 +2,7 @@
  * @Description: 负责收取qrcode的信息， 设置导航目标点
  * @Author: lifuguan
  * @Date: 2019-10-03 17:21:04
- * @LastEditTime: 2019-10-15 21:53:59
+ * @LastEditTime: 2019-10-18 15:37:59
  * @LastEditors: Please set LastEditors
  */
 
@@ -62,6 +62,8 @@ int main(int argc, char **argv)
     tf::TransformListener goal_to_car_listener;
     tf::StampedTransform goal_to_car_stamped;
 
+    gx2019_omni_simulations::cv_mission_type cv_mission_type;
+
     ros::Rate rate(5.0);
     while (nh.ok())
     {
@@ -77,7 +79,6 @@ int main(int argc, char **argv)
 
                 double dst = cmdVelCalculate(goal_to_car_stamped);
                 ROS_INFO("%f", dst);
-                gx2019_omni_simulations::cv_mission_type cv_mission_type;
                 // 如果没有达到目标距离 / 没有收到队列信息
                 if (dst <= 0.7 && dst >= 0.5 && check_if_mission_reviced == false)
                 {
@@ -102,12 +103,32 @@ int main(int argc, char **argv)
         //识别到二维码之后
         else
         {
-            goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][0] - 1]], ros::Time::now(), "goal", "map"));
+            if (step == 0)
+            {
+                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][0] - 1]], ros::Time::now(), "goal", "map"));
+                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
+                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
+                // 开启跟踪
+                if (dst <= 0.5 && dst >= 0.05)
+                {
+                    cv_mission_type.cv_mission_type = 2;
+                }
+                // 抓物体
+                else if (dst <= 0.05)
+                {
+                    cv_mission_type.cv_mission_type = 3;
+                    // 延时5s，视情况而定，机械臂抓取物体
+                    ros::Duration(5).sleep();
 
-            goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
+                }
+                cv_mission_pub.publish(cv_mission_type);
+            }
+            
 
             cmdVelCalculate(goal_to_car_stamped);
         }
+
+
         pub.publish(cmd_vel);
         ros::spinOnce();
         rate.sleep();

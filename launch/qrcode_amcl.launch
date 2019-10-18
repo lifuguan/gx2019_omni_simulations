@@ -1,16 +1,35 @@
 <launch>
      <node name="map_server" pkg="map_server" type="map_server" args="$(find gx2019_omni_simulations)/map/map.yaml"/>
-     
+
      <include file="$(find gx2019_omni_simulations)/launch/qrcode_detecter_simulations.launch" />
-     
+
      <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
-     
+
      <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
           <rosparam file="$(find gx2019_omni_simulations)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
           <rosparam file="$(find gx2019_omni_simulations)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
           <rosparam file="$(find gx2019_omni_simulations)/config/local_costmap_params.yaml" command="load" />
           <rosparam file="$(find gx2019_omni_simulations)/config/global_costmap_params.yaml" command="load" />
           <rosparam file="$(find gx2019_omni_simulations)/config/base_local_planner_params.yaml" command="load" />
+     </node>
+
+     <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
+          <param name="laser_scan_topic" value="my_robot/laser/scan"/>
+          <!-- topic where the lidar scans are being published -->
+          <param name="odom_topic" value="/odom_rf2o" />
+          <!-- topic where tu publish the odometry estimations -->
+          <param name="publish_tf" value="false" />
+          <!-- wheter or not to publish the tf::transform (base->odom) -->
+          <param name="base_frame_id" value="/base_link"/>
+          <!-- frame_id (tf) of the mobile robot base. A tf transform from the laser_frame to the base_frame is mandatory -->
+          <param name="odom_frame_id" value="/odom" />
+          <!-- frame_id (tf) to publish the odometry estimations     -->
+          <param name="init_pose_from_topic" value="/initalpose" />
+          <!-- (Odom topic) Leave empty to start at point (0,0) -->
+          <param name="freq" value="6.0"/>
+          <!-- Execution frequency. -->
+          <param name="verbose" value="true" />
+          <!-- verbose -->
      </node>
 </launch>
 
