@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-11 18:19:42
+ * @LastEditTime: 2019-10-18 20:22:39
  * @LastEditors: Please set LastEditors
  */
 #include <visp3/core/vpPixelMeterConversion.h>
@@ -24,7 +24,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 using namespace cv;
-static const std::string IMAGE_TOPIC = "/my_robot/camera1/image_raw";
+static const std::string IMAGE_TOPIC = "/usb_cam/image_raw";
 Mat frame;
 
 vpDisplayX *d = NULL;

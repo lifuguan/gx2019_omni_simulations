@@ -2,7 +2,7 @@
  * @Description: 色块识别和追踪
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-18 16:07:28
+ * @LastEditTime: 2019-10-18 20:25:59
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -17,7 +17,7 @@
 using namespace std;
 using namespace cv;
 
-static const std::string IMAGE_TOPIC = "/my_robot/camera1/image_raw";
+static const std::string IMAGE_TOPIC = "/usb_cam/image_raw";
 
 //设置颜色区间
 Scalar red_range[3] = {Scalar(0, 160, 50), Scalar(10, 255, 255)};
