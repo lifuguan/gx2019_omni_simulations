@@ -175,6 +175,8 @@ endif(OpenCV_FOUND)
 add_executable(gx2019_mission_control_node src/gx2019_mission_control_node.cpp)
 target_link_libraries(gx2019_mission_control_node ${catkin_LIBRARIES})
 
+add_executable(gx2019_chassis_test src/gx2019_chassis_test.cpp)
+target_link_libraries(gx2019_chassis_test ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############
