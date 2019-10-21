@@ -166,6 +166,10 @@ if(OpenCV_FOUND)
     target_link_libraries(gx2019_cylinder_localization_node ${catkin_LIBRARIES})
     target_link_libraries(gx2019_cylinder_localization_node ${OpenCV_LIBS} ) 
 
+    add_executable(gx2019_gimbal_test src/gx2019_gimbal_test.cpp)
+    target_link_libraries(gx2019_gimbal_test ${catkin_LIBRARIES})
+    target_link_libraries(gx2019_gimbal_test ${OpenCV_LIBS} )
+
     add_executable(qrcode_detecter src/qrcode_detecter.cpp)
     target_link_libraries(qrcode_detecter ${catkin_LIBRARIES})
     target_link_libraries(qrcode_detecter ${OpenCV_LIBS} )

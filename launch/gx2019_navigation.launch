@@ -3,7 +3,7 @@
   <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map.yaml"/>
 
   <!-- Turtlebot3 -->
-  <include file="$(find gx2019_omni_simulations)/launch/gx2019_remote.launch"/>
+  <include file="$(find gx2019_omni_simulations)/launch/gx2019_simulation.launch"/>
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
