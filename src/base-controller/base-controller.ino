@@ -1,9 +1,17 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-10-20 09:47:30
+ * @LastEditTime: 2019-10-22 23:02:12
+ * @LastEditors: Please set LastEditors
+ */
 #include <ros.h>
 #include <PID_v1.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 #include <LobotServoController.h>
-
+#include <gx2019_omni_simulations/arm_transport.h>
+#include <std_msgs/Float32.h>
 LobotServoController mxarm(Serial1);
 
 int atop(int angle_in)
@@ -23,6 +31,7 @@ int IN3_BR = 35;
 int IN4_BR = 37;       //对应控制左轮L298N模块-2 IN1/2/3/4,用于控制电机方向与启停
 int h = 12;
 int w = 19;
+double arm[6]={0};
 long int longterm = 0; //长期控制的四轮平均值
 String vel_read_str = "";
 String omg_read_str = "";
@@ -41,8 +50,17 @@ void velCallback(const geometry_msgs::Twist& vel)
   omg_in = vel.angular.z;
 }
 
+void armTransportCallback(const gx2019_omni_simulations::arm_transport& msg)
+{
+  omg_in_arm = msg.gimbal_rotate;
+}
+
 ros::NodeHandle b_c;
 ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel",velCallback);
+ros::Subscriber<gx2019_omni_simulations::arm_transport> arm_transport_sub("arm_transport", armTransportCallback);
+
+std_msgs::Float32 float_msg;
+ros::Publisher chatter("chatter", &float_msg);
 
 class motor_settings
 {
@@ -291,12 +309,82 @@ void get_velomg() //此处程序为遥控车用,读取串口2收到的速度与�
 //    Serial.println(omg_in);
 }
 
+void shen_zhua()
+{
+  arm[1]=135-90;
+  arm[2]=135-42;
+  arm[3]=135-50;
+  arm[5]=180;
+  mxarm.moveServos(4,2000,11,atop(arm[1]),12,atop(arm[2]),13,atop(arm[3]),15,atop(arm[5]));
+  delay(2200);
+  arm[5]=80;
+  mxarm.moveServo(15,atop(arm[5]),1000);
+}
+
+void shen_fang()
+{
+  arm[1]=135-90;
+  arm[2]=135-42;
+  arm[3]=135-50;
+  arm[5]=80;
+  mxarm.moveServos(4,2000,11,atop(arm[1]),12,atop(arm[2]),13,atop(arm[3]),15,atop(arm[5]));
+  delay(2200);
+  arm[5]=180;
+  mxarm.moveServo(15,atop(arm[5]),1000);  
+}
+
+void shou()
+{
+  arm[0]=145;
+  arm[1]=210;
+  arm[2]=190;
+  arm[3]=155;
+  mxarm.moveServo(10,atop(arm[0]),1000);//大逆小顺
+  mxarm.moveServo(11,atop(arm[1]),1000);//大后小前
+  mxarm.moveServo(12,atop(arm[2]),1000);//大逆小顺
+  mxarm.moveServo(13,atop(arm[3]),1000);//大逆小顺
+}
+
+void zero()
+{
+
+  arm[0]=135; arm[1]=135; arm[2]=135; arm[3]=135; arm[4]=135; arm[5]=135;
+  mxarm.moveServos(5,1000,10,atop(arm[0]),11,atop(arm[1]),12,atop(arm[2]),13,atop(arm[3]),14,atop(arm[4]),15,atop(arm[5]));//归零
+  arm[0]=145;
+  arm[1]=210;
+  arm[2]=190;
+  arm[3]=155;
+  arm[4]=135;
+  arm[5]=180;
+  mxarm.moveServo(10,atop(arm[0]),2000);//大逆小顺
+  mxarm.moveServo(11,atop(arm[1]),2000);//大后小前
+  mxarm.moveServo(12,atop(arm[2]),2000);//大逆小顺
+  mxarm.moveServo(13,atop(arm[3]),2000);//大逆小顺
+  mxarm.moveServo(15,atop(arm[4]),2000);//大开小合
+}
+
+void turn()
+{
+  arm[0] += omg_in_arm;
+  float_msg.data = arm[0];
+  chatter.publish(&float_msg);
+  if(arm[0]>270)
+  {arm[0] = 270;}
+  if(arm[0] < 0)
+  {arm[0] = 0;}
+  mxarm.moveServo(10,atop(arm[0]),200);
+}
+
+
 void setup()
 {
   b_c.initNode();
   b_c.subscribe(sub);
+  b_c.subscribe(arm_transport_sub);
+  b_c.advertise(chatter);
   //Serial.begin(9600);
   Serial2.begin(9600);
+  Serial1.begin(9600);
   pinMode(IN1_AL, OUTPUT);
   pinMode(IN2_AL, OUTPUT);
   pinMode(IN3_AR, OUTPUT);
@@ -316,6 +404,9 @@ void setup()
   digitalWrite(IN2_BL, LOW);
   digitalWrite(IN3_BR, LOW);
   digitalWrite(IN4_BR, HIGH);
+
+  zero();
+  
   attachInterrupt(digitalPinToInterrupt(left_front_wheel.hall), left_front_count, FALLING);
   attachInterrupt(digitalPinToInterrupt(right_front_wheel.hall), right_front_count, FALLING);
   attachInterrupt(digitalPinToInterrupt(left_back_wheel.hall), left_back_count, FALLING);
@@ -331,7 +422,7 @@ void loop()
   // Serial.print("b_vel_in_x = ");
   // Serial.println(vel_in_x);
 
-  
+  turn();
 
   left_front_wheel.vel_process();
   left_front_wheel.SetPoint = left_front_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
