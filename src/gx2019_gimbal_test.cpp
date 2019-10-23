@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-21 22:49:47
+ * @LastEditTime: 2019-10-22 23:17:42
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -12,6 +12,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <gx2019_omni_simulations/arm_transport.h>
+
 using namespace std;
 using namespace cv;
 
@@ -29,6 +30,8 @@ enum TARGET_COLOR
     blue,
     green
 };
+ros::Publisher arm_transport_pub;
+gx2019_omni_simulations::arm_transport arm_transport;
 
 void imageCallback(const sensor_msgs::ImageConstPtr &msg);
 //初始化图形并圈出
@@ -36,16 +39,25 @@ string detect(vector<Point> cnts_single, vector<Point> &approx);
 
 void drawLine(Mat &frame, string shape, vector<Point> &approx);
 
+int cX_ = 320;
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "gx2019_cylinder_localization_node");
+    ros::init(argc, argv, "gx2019_gimbal_test");
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
-    image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 1, imageCallback);
+    image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 10, imageCallback);
+    arm_transport_pub = nh.advertise<gx2019_omni_simulations::arm_transport>("arm_transport", 1);
     namedWindow("OPENCV_WINDOW");
-    cout << blue_range[0][0] << endl;
-    // 等待函数
-    ros::spin();
+    ros::Rate loop(2);
+    while (nh.ok())
+    {
+        arm_transport.arm_moveit = false;
+        arm_transport.gimbal_rotate = (double)-(cX_ - 320) / 100;
+        arm_transport_pub.publish(arm_transport);
+        ros::spinOnce();
+        loop.sleep();
+    }
+
     return 0;
 }
 
@@ -103,6 +115,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                 //表示图像重心
                 cX = int((M.m10 / M.m00));
                 cY = int((M.m01 / M.m00));
+                cX_ = cX;
             }
             else
             {
@@ -118,13 +131,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
             line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
             putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
             drawLine(frame, shape, approx);                                                                                                             //画矩形
-            imshow("OPENCV_WINDOW", frame);
         }
         else
         {
             //printf("too fucking small %d\n", cnts_single.size());
         }
     }
+    imshow("OPENCV_WINDOW", frame);
 
     waitKey(30);
 }
