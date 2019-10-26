@@ -302,7 +302,7 @@
   <joint name="imu_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.05"/>
     <parent link="base_link"/>
-    <child link="imu_joint"/>
+    <child link="imu_link"/>
   </joint>
   <!-- Hokuyo Laser -->
   <joint name="hokuyo_joint" type="fixed">
