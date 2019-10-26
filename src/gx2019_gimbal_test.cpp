@@ -2,11 +2,12 @@
  * @Description: In User Settings Edit
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-25 22:56:50
+ * @LastEditTime: 2019-10-27 00:07:00
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
 #include <string>
+#include <cmath>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -49,20 +50,43 @@ int main(int argc, char **argv)
     arm_transport_pub = nh.advertise<gx2019_omni_simulations::arm_transport>("arm_transport", 1);
     namedWindow("OPENCV_WINDOW");
     ros::Rate loop(5);
+    int time = 1;
     while (nh.ok())
     {
-        //cX_ += 1;
-        if (abs(cX_ - 320) <= 10 && abs(cX_ - 320) >= 1)
+        double pixel_ = 0;
+        if (cX_ - (640 - 279.9) < 0)
         {
-            arm_transport.arm_moveit = true;
-            arm_transport.gimbal_rotate = 320;
+            pixel_ = cX_ - (640 - 279.9);
         }
         else
         {
-            arm_transport.arm_moveit = false;
-            arm_transport.gimbal_rotate = cX_;
+            pixel_ = cX_ - (640 - 360.1);
         }
-        arm_transport_pub.publish(arm_transport);
+        double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
+        if (cX_ == 320)
+        {
+        }
+        // else if (abs(angular) <= 0.5)
+        // {
+        //     arm_transport.arm_moveit = true;
+        //     arm_transport.gimbal_rotate = 0;
+        //     arm_transport_pub.publish(arm_transport);
+        // }
+        else
+        {
+            if (time == 1)
+            {
+                cout << "angular : " << angular << endl;
+                arm_transport.arm_moveit = false;
+                arm_transport.gimbal_rotate = angular;
+                arm_transport_pub.publish(arm_transport);
+            
+                arm_transport.arm_moveit = true;
+                arm_transport.gimbal_rotate = 0;
+                arm_transport_pub.publish(arm_transport);
+                time += 1;
+            }
+        }
         ros::spinOnce();
         loop.sleep();
     }
@@ -72,7 +96,7 @@ int main(int argc, char **argv)
 
 void imageCallback(const sensor_msgs::ImageConstPtr &msg)
 {
-    Mat frame_hsv, frame;
+    Mat frame_hsv, frame, frame_origin;
     try
     {
         frame = cv_bridge::toCvShare(msg, "bgr8")->image;
@@ -82,6 +106,28 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
         ROS_ERROR("%s", e.what());
         return;
     }
+    // vector<Mat> imageRGB;
+    // split(frame_origin, imageRGB);
+
+    // //求原始图像的RGB分量的均值
+    // double R, G, B;
+    // B = mean(imageRGB[0])[0];
+    // G = mean(imageRGB[1])[0];
+    // R = mean(imageRGB[2])[0];
+
+    // //需要调整的RGB分量的增益
+    // double KR, KG, KB;
+    // KB = (R + G + B) / (3 * B);
+    // KG = (R + G + B) / (3 * G);
+    // KR = (R + G + B) / (3 * R);
+
+    // //调整RGB三个通道各自的值
+    // imageRGB[0] = imageRGB[0] * KB;
+    // imageRGB[1] = imageRGB[1] * KG;
+    // imageRGB[2] = imageRGB[2] * KR;
+
+    // //RGB三通道图像合并
+    // merge(imageRGB, frame);
 
     //图像格式切换
     cvtColor(frame, frame_hsv, COLOR_BGR2HSV);
@@ -113,7 +159,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
     for (int i = 0; i < cnts.size(); i++)
     {
         vector<Point> cnts_single = cnts[i]; //获取了上面一堆点中的一个点
-        if (cnts_single.size() > 200)
+        if (cnts_single.size() > 300)
         {
             vector<Point> approx;
             string shape = detect(cnts_single, approx);
