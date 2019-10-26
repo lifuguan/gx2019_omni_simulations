@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-22 23:17:42
+ * @LastEditTime: 2019-10-25 22:56:50
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -48,11 +48,20 @@ int main(int argc, char **argv)
     image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 10, imageCallback);
     arm_transport_pub = nh.advertise<gx2019_omni_simulations::arm_transport>("arm_transport", 1);
     namedWindow("OPENCV_WINDOW");
-    ros::Rate loop(2);
+    ros::Rate loop(5);
     while (nh.ok())
     {
-        arm_transport.arm_moveit = false;
-        arm_transport.gimbal_rotate = (double)-(cX_ - 320) / 100;
+        //cX_ += 1;
+        if (abs(cX_ - 320) <= 10 && abs(cX_ - 320) >= 1)
+        {
+            arm_transport.arm_moveit = true;
+            arm_transport.gimbal_rotate = 320;
+        }
+        else
+        {
+            arm_transport.arm_moveit = false;
+            arm_transport.gimbal_rotate = cX_;
+        }
         arm_transport_pub.publish(arm_transport);
         ros::spinOnce();
         loop.sleep();
