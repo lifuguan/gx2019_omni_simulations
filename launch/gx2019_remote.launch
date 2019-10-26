@@ -1,45 +1,44 @@
 <launch>
-  <arg name="launch_prefix" default="" />
-  <arg name="camera_name" default="/my_robot/camera1" />
+  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map_remote.yaml"/>
 
+  <!-- open rplidar A2 -->
+  <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode" output="screen">
+    <param name="serial_port" type="string" value="/dev/rplidar"/>
+    <param name="serial_baudrate" type="int" value="115200"/>
+    <param name="frame_id" type="string" value="hokuyo_link"/>
+    <param name="inverted" type="bool" value="false"/>
+    <param name="angle_compensate" type="bool" value="true"/>
+    <remap from="scan" to="my_robot/laser/scan"/>
+  </node>
+  <!-- open art imu -->
+  <node pkg="art_imu" name="imu" type="art_imu" output="screen">
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="frame_id" type="string" value="imu_link"/>
+    <param name="model" value="art_imu_02a"/>
+    <param name="baud" value="115200"/>
+  </node>
+  <!-- open usb camera -->
+  <!-- <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen">
+    <param name="video_device" value="/dev/video4" />
+    <param name="image_width" value="1280" />
+    <param name="image_height" value="720" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="ca mera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node> -->
 
-  <param name="robot_description" command="cat '$(find gx2019_omni_simulations)/urdf/car_no_kinect.urdf'"/>
-
+  <include file="$(find gx2019_omni_simulations)/launch/gx2019_localization.launch" />
+  <param name="robot_description" command="cat '$(find gx2019_omni_simulations)/urdf/car.urdf'"/>
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
   <!-- send fake joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="use_gui" value="False"/>
   </node>
 
-  <!-- Combine joint values -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find gx2019_omni_simulations)/worlds/competition_with_button.world"/>
-    <arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
-    <arg name="debug" value="false"/>
-    <remap from="tf" to="gazebo_tf"/>
-  </include>
-  
-  <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model my_robot -x .2 -y .2 -z 0.0 -param robot_description" />
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find gx2019_omni_simulations)/rviz/rviz.rviz"/>
-
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find gx2019_omni_simulations)/rviz/rviz_remote.rviz"/>
 
   <node pkg="tf" type="static_transform_publisher" name="camera" args="0.0 0.0 0.0 -1.57 0 -1.57 camera_link camera 100" />
-  <!-- Launch the tracking node -->
-  <!-- <node pkg="visp_auto_tracker" type="visp_auto_tracker" name="visp_auto_tracker" output="screen" launch-prefix="$(arg launch_prefix)">
-    <param name="model_path" value="$(find visp_auto_tracker)/models" />
-    <param name="model_name" value="pattern" />
-    <param name="debug_display" value="True" />
-	      
-    <remap from="/visp_auto_tracker/camera_info" to="$(arg camera_name)/camera_info"/>
-    <remap from="/visp_auto_tracker/image_raw" to="$(arg camera_name)/image_raw"/>
-  </node> -->
-
 </launch>
-
-
-
