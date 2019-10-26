@@ -6,7 +6,10 @@
                 "/opt/arduino-1.8.8/tools/**",
                 "/opt/arduino-1.8.8/hardware/arduino/avr/**",
                 "/home/gug/sketchbook/libraries/**",
-                "${workspaceFolder}/**"   
+                "${workspaceFolder}/**",
+                "/home/robomaster/arduino-1.8.8/hardware/arduino/avr/**",
+                "/home/robomaster/arduino-1.8.8/tools/**",
+                "/home/robomaster/Arduino/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
@@ -14,7 +17,9 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
             "forcedInclude": [
-                "/opt/arduino-1.8.8/hardware/arduino/avr/cores/arduino/Arduino.h"
+                "/opt/arduino-1.8.8/hardware/arduino/avr/cores/arduino/Arduino.h",
+                "/home/robomaster/arduino-1.8.8/hardware/arduino/avr/cores/arduino/Arduino.h",
+                "/home/robomaster/Arduino/ros_lib/*"
             ]
         }
     ],
