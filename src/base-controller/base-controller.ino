@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-10-26 19:55:28
- * @LastEditTime: 2019-10-26 22:23:10
+ * @LastEditTime: 2019-10-27 15:23:48
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /base-controller/base-controller.ino
@@ -178,33 +178,33 @@ public:
       counter = 0; //输出速度结果后清零，记录下一秒的触发次数
     }
   }
-  // void vel_process_mecanum()
-  // {
-  //   if (status == 1)
-  //   {
-  //     vel_out = vel_in_x - vel_in_y + omg_in * (h + w);
-  //     //Serial.print("rf : ");
-  //     //Serial.println(vel_out);
-  //   }
-  //   else if (status == 2)
-  //   {
-  //     vel_out = vel_in_x + vel_in_y - omg_in * (h + w);
-  //     //Serial.print("lf : ");
-  //     //Serial.println(vel_out);
-  //   }
-  //   else if (status == 3)
-  //   {
-  //     vel_out = vel_in_x - vel_in_y - omg_in * (h + w);
-  //     //Serial.print("lb : ");
-  //     //Serial.println(vel_out);
-  //   }
-  //   else if (status == 4)
-  //   {
-  //     vel_out = vel_in_x + vel_in_y + omg_in * (h + w);
-  //     //Serial.print("rb : ");
-  //     //Serial.println(vel_out);
-  //   }
-  // }
+  void vel_process_mecanum()
+  {
+    if (status == 1)
+    {
+      vel_out = vel_in_x - vel_in_y + omg_in * (h + w);
+      //Serial.print("rf : ");
+      //Serial.println(vel_out);
+    }
+    else if (status == 2)
+    {
+      vel_out = vel_in_x + vel_in_y - omg_in * (h + w);
+      //Serial.print("lf : ");
+      //Serial.println(vel_out);
+    }
+    else if (status == 3)
+    {
+      vel_out = vel_in_x - vel_in_y - omg_in * (h + w);
+      //Serial.print("lb : ");
+      //Serial.println(vel_out);
+    }
+    else if (status == 4)
+    {
+      vel_out = vel_in_x + vel_in_y + omg_in * (h + w);
+      //Serial.print("rb : ");
+      //Serial.println(vel_out);
+    }
+  }
 
   void vel_process_normal()
   {
@@ -417,6 +417,7 @@ void setup()
   b_c.subscribe(sub);
   b_c.subscribe(arm_transport_sub);
   b_c.advertise(chatter);
+  b_c.advertise(pos);
   //Serial.begin(9600);
   Serial2.begin(9600);
   pinMode(IN1_AL, OUTPUT);
@@ -461,21 +462,21 @@ void loop()
 
   //turn();
 
-  right_front_wheel.vel_process_normal();
+  right_front_wheel.vel_process_mecanum();
   right_front_wheel.SetPoint = right_front_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   right_front_wheel.pid_process();
   //right_front_wheel.test();
 
-  left_front_wheel.vel_process_normal();
+  left_front_wheel.vel_process_mecanum();
   left_front_wheel.SetPoint = left_front_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   left_front_wheel.pid_process();
   left_front_wheel.test();
 
-  left_back_wheel.vel_process_normal();
+  left_back_wheel.vel_process_mecanum();
   left_back_wheel.SetPoint = left_back_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   left_back_wheel.pid_process();
 
-  right_back_wheel.vel_process_normal();
+  right_back_wheel.vel_process_mecanum();
   right_back_wheel.SetPoint = right_back_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   right_back_wheel.pid_process();
 
