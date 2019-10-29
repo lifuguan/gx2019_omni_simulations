@@ -1,5 +1,5 @@
 
-frequency: 10
+frequency: 15
 sensor_timeout: 0.025
 two_d_mode: true
 transform_time_offset: 0.0001
@@ -43,7 +43,7 @@ odom0: /rf2o_laser_odometry/odom
 odom0_config: [true, true, false,
                false, false, true,
                true, true, false,
-               false, false, false,
+               false, false, true,
                false, false, false]
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -79,6 +79,21 @@ odom0_relative: false
 # the thresholds. 
 odom0_pose_rejection_threshold: 8
 odom0_twist_rejection_threshold: 0.75
+
+# odom1: /amcl_pose
+# odom1_config: [true, true, true,
+#                false, false, true,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# odom1_differential: true
+# odom1_relative: true
+# odom1_queue_size: 5
+# odom1_pose_rejection_threshold: 8
+# odom1_twist_rejection_threshold: 0.75
+# odom1_nodelay: false
+
+
 
 imu0: /imu_data
 imu0_config: [false, false, false,

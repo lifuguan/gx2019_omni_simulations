@@ -11,10 +11,10 @@
   </node>
 
   <!-- robot localization. Here got a problem -->
-  <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
       <rosparam command="load" file="$(find gx2019_omni_simulations)/params/ekf_params.yaml" />
-  </node> -->
+  </node>
   
   <!-- robot AMCL -->
-  <!-- <include file="$(find gx2019_omni_simulations)/launch/amcl.launch"/> -->
+  <include file="$(find gx2019_omni_simulations)/launch/amcl.launch"/>
 </launch>

@@ -290,7 +290,7 @@
     <parent link="base_link"/>
     <child link="camera_link"/>
   </joint>
-  <link name="imu_link">
+  <link name="imu_link_">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -302,7 +302,7 @@
   <joint name="imu_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.05"/>
     <parent link="base_link"/>
-    <child link="imu_link"/>
+    <child link="imu_link_"/>
   </joint>
   <!-- Hokuyo Laser -->
   <joint name="hokuyo_joint" type="fixed">

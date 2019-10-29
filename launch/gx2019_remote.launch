@@ -1,5 +1,5 @@
 <launch>
-  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map_remote.yaml"/>
+  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map.yaml"/>
 
   <!-- open rplidar A2 -->
   <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode" output="screen">
@@ -36,7 +36,7 @@
     <param name="use_gui" value="False"/>
   </node>
 
-  <!-- <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/> -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find gx2019_omni_simulations)/rviz/rviz_remote.rviz"/>
 

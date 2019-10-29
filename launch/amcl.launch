@@ -34,7 +34,7 @@
     <param name="laser_likelihood_max_dist" value="2.0"/>
     <param name="laser_model_type" value="likelihood_field"/>
 
-    <param name="odom_model_type" value="omni"/>
+    <param name="odom_model_type" value="diff-corrected"/>
     <param name="odom_alpha1" value="0.1"/>
     <param name="odom_alpha2" value="0.1"/>
     <param name="odom_alpha3" value="0.1"/>
@@ -42,12 +42,5 @@
     <param name="odom_frame_id" value="odom"/>
     <param name="base_frame_id" value="base_link"/>
   </node>
-  <!-- <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
-    <param name="laser_scan_topic" value="$(arg scan_topic)"/>
-    <param name="base_frame_id" value="/base_link"/>
-    <param name="init_pose_from_topic" value="" />
-    <param name="odom_frame_id" value="/odom"/>
-    <param name="freq" value="10.0"/>
-  </node> -->
 
 </launch>

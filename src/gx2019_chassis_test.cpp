@@ -2,7 +2,7 @@
  * @Description: 用于测试小车底盘
  * @Author: your name
  * @Date: 2019-10-19 14:19:17
- * @LastEditTime: 2019-10-19 15:21:01
+ * @LastEditTime: 2019-10-29 21:28:47
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -14,7 +14,7 @@
 using namespace std;
 geometry_msgs::Twist cmd_vel;
 
-tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1, 0, 0));
+tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1, -0.8, 0));
 
 int main(int argc, char **argv)
 {
@@ -53,8 +53,8 @@ int main(int argc, char **argv)
             }
             else
             {
-                cmd_vel.linear.x = 0.3 * tanh(dst) * (x / dst);
-                cmd_vel.linear.y = 0.3 * tanh(dst) * (y / dst);
+                cmd_vel.linear.x = 1 * tanh(dst) * (x / dst);
+                cmd_vel.linear.y = -1 * tanh(dst) * (y / dst);
             }
             pub.publish(cmd_vel);
             ROS_INFO("%f", dst);
