@@ -1,0 +1,3 @@
+<launch>
+<node name="rviz" pkg="rviz" type="rviz" args="-d $(find gx2019_omni_simulations)/rviz/rviz_remote.rviz"/>
+</launch>

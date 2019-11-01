@@ -6,7 +6,7 @@
     <param name="serial_port" type="string" value="/dev/rplidar"/>
     <param name="serial_baudrate" type="int" value="115200"/>
     <param name="frame_id" type="string" value="hokuyo_link"/>
-    <param name="inverted" type="bool" value="false"/>
+    <param name="inverted" type="bool" value="true"/>
     <param name="angle_compensate" type="bool" value="true"/>
     <remap from="scan" to="my_robot/laser/scan"/>
   </node>
@@ -37,8 +37,5 @@
   </node>
 
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find gx2019_omni_simulations)/rviz/rviz_remote.rviz"/>
-
   <node pkg="tf" type="static_transform_publisher" name="camera" args="0.0 0.0 0.0 -1.57 0 -1.57 camera_link camera 100" />
 </launch>
