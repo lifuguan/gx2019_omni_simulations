@@ -16,5 +16,5 @@
   </node>
   
   <!-- robot AMCL -->
-  <include file="$(find gx2019_omni_simulations)/launch/amcl.launch"/>
+  <!-- <include file="$(find gx2019_omni_simulations)/launch/amcl.launch"/> -->
 </launch>

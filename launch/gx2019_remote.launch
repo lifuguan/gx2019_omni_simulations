@@ -1,6 +1,4 @@
 <launch>
-  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map.yaml"/>
-
   <!-- open rplidar A2 -->
   <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode" output="screen">
     <param name="serial_port" type="string" value="/dev/rplidar"/>
@@ -23,7 +21,7 @@
     <param name="image_width" value="1280" />
     <param name="image_height" value="720" />
     <param name="pixel_format" value="yuyv" />
-    <param name="ca mera_frame_id" value="usb_cam" />
+   <param name="ca mera_frame_id" value="usb_cam" />
     <param name="io_method" value="mmap"/>
   </node> -->
 
@@ -36,6 +34,5 @@
     <param name="use_gui" value="False"/>
   </node>
 
-  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
   <node pkg="tf" type="static_transform_publisher" name="camera" args="0.0 0.0 0.0 -1.57 0 -1.57 camera_link camera 100" />
 </launch>

@@ -4,6 +4,7 @@
   <arg name="initial_pose_x" default="0.2"/>
   <arg name="initial_pose_y" default="0.2"/>
   <arg name="initial_pose_a" default="0.0"/>
+  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map.yaml"/>
 
   <!-- AMCL -->
   <node pkg="amcl" type="amcl" name="amcl">
@@ -42,5 +43,6 @@
     <param name="odom_frame_id" value="odom"/>
     <param name="base_frame_id" value="base_link"/>
   </node>
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
 </launch>
