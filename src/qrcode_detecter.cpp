@@ -94,25 +94,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
     if (time_ == 1)
     {
       vpImageConvert::convert(frame, I);
-      d = new vpDisplayX();
-      d->init(I);
-      vpDisplay::setTitle(I, "visp_auto_tracker debug display");
       time_ += 1;
     }
 
     // 从opencv Mat格式转换到 VISP格式
     vpImageConvert::convert(frame, I);
-    vpDisplay::display(I);
-    vpDisplay::flush(I);
-    if (vpDisplay::getClick(I, false)) // a click to exit
-    {
-    }
 
     bool status = detector.detect(I);
-
-    std::ostringstream legend;
-    legend << detector.getNbObjects() << " bar code detected";
-    vpDisplay::displayText(I, (int)I.getHeight() - 30, 10, legend.str(), vpColor::red);
 
     if (status)
     { // true if at least one QRcode is detected
@@ -123,45 +111,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
 
         // 信息读取
         vpRect bbox = detector.getBBox(i);
-        vpDisplay::displayRectangle(I, bbox, vpColor::green);
-        vpDisplay::displayText(I, (int)bbox.getTop() - 20, (int)bbox.getLeft(),
-                               "Message: \"" + detector.getMessage(i) + "\"", vpColor::red);
         std_msgs::String msg;
         msg.data = detector.getMessage(i);
         pub.publish(msg);
         abort_control = true;
 
-        for (size_t j = 0; j < p.size(); j++)
-        {
-          vpDisplay::displayCross(I, p[j], 14, vpColor::red, 3);
-          std::ostringstream number;
-          number << j;
-          vpDisplay::displayText(I, p[j] + vpImagePoint(10, 0), number.str(), vpColor::blue);
-        }
-
-        for (size_t j = 0; j < p.size(); j++)
-        {
-          vpDisplay::displayCross(I, p[j], 14, vpColor::red, 3);
-          std::ostringstream number;
-          number << j;
-          vpDisplay::displayText(I, p[j] + vpImagePoint(15, 5), number.str(), vpColor::blue);
-        }
         // 位姿读取
         computePose(point, p, cam, init,
                     cMo); // resulting pose is available in cMo var
-        std::cout << "Pose translation (meter): " << cMo.getTranslationVector().t() << std::endl
-                  << "Pose rotation (quaternion): " << vpQuaternionVector(cMo.getRotationMatrix()).t() << std::endl;
-        vpDisplay::displayFrame(I, cMo, cam, 0.05, vpColor::none, 3);
       }
     }
-    vpDisplay::displayText(I, (int)I.getHeight() - 15, 10, "A click to quit...", vpColor::red);
-    vpDisplay::flush(I);
     vpImageConvert::convert(I, frame);
-
-    if (vpDisplay::getClick(I, false))
-    {
-    }
-
     vpTime::wait(40);
   }
   catch (cv_bridge::Exception &e)

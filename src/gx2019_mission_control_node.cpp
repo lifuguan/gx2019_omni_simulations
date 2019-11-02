@@ -33,7 +33,7 @@ tf::Transform goals[3][4] =
          tf::Transform(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.3, -1.35, 0))}};
 
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
-tf::Transform qrcode_point(tf::Quaternion(0, 0, 1.0, 1), tf::Vector3(0.8, -1.8, 0));
+tf::Transform qrcode_point(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.2, 0.8, 0));
 
 int qrcode_message[2][4] = {0};
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
             //避免第一次订阅时翻车
             try
             {
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
 
                 double dst = cmdVelCalculate(goal_to_car_stamped);
                 ROS_INFO("%f", dst);
@@ -163,11 +163,11 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     tf::Matrix3x3(goal_to_car_stamped.getRotation()).getEulerYPR(yaw, pitch, roll);
 
     double x, y, rotation, dst;
-    x = -goal_to_car_stamped.getOrigin().y();
-    y = goal_to_car_stamped.getOrigin().x();
+    x = goal_to_car_stamped.getOrigin().x();
+    y = goal_to_car_stamped.getOrigin().y();
     rotation = yaw;
     dst = sqrt(pow(x, 2) + pow(y, 2));
-    if (dst <= 0.02)
+    if (dst <= 0.1)
     {
         cmd_vel.linear.x = 0;
         cmd_vel.linear.y = 0;
@@ -175,9 +175,10 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     }
     else
     {
-        cmd_vel.linear.x = 0.3 * tanh(dst) * (x / dst);
-        cmd_vel.linear.y = 0.3 * tanh(dst) * (y / dst);
-        // cmd_vel.angular.z = -0.7 * rotation;
+        cmd_vel.linear.x = 0.5 * tanh(dst) * (x / dst);
+        cmd_vel.linear.y = 0.5 * tanh(dst) * (y / dst);
+        // camd_vel.angular.z = 0.5 * rotation;
+        cmd_vel.angular.z = 0.5 * rotation;
         // cmd_vel.angular.z = atan2(x, y);
     }
 

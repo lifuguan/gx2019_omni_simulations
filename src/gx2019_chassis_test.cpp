@@ -14,7 +14,7 @@
 using namespace std;
 geometry_msgs::Twist cmd_vel;
 
-tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1, 0.8, 0));
+tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1.2, 0.8, 0));
 
 int main(int argc, char **argv)
 {
@@ -30,20 +30,21 @@ int main(int argc, char **argv)
     {
 
         goal_frame_broadcaster.sendTransform(tf::StampedTransform(test_point, ros::Time::now(), "goal", "map"));
-        
-        
+
         //避免第一次订阅时翻车
         try
         {
-            goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
+            goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
 
             //四元数转RPY ， 使用yaw
             double yaw, pitch, roll;
             tf::Matrix3x3(goal_to_car_stamped.getRotation()).getEulerYPR(yaw, pitch, roll);
 
             double x, y, rotation, dst;
-            x = -goal_to_car_stamped.getOrigin().y();
-            y = -goal_to_car_stamped.getOrigin().x();
+            y = goal_to_car_stamped.getOrigin().y();
+            x = goal_to_car_stamped.getOrigin().x();
+            ROS_INFO("vel: %f %f", x, y);
+
             rotation = yaw;
             dst = sqrt(pow(x, 2) + pow(y, 2));
             if (dst <= 0.1)
@@ -58,8 +59,7 @@ int main(int argc, char **argv)
             else
             {
                 cmd_vel.linear.x = 0.6 * tanh(dst) * (x / dst);
-                cmd_vel.linear.y = -0.6 * tanh(dst) * (y / dst);
-                ROS_INFO("vel: %f %f", cmd_vel.linear.x, cmd_vel.linear.y);
+                cmd_vel.linear.y = 0.6 * tanh(dst) * (y / dst);
             }
             pub.publish(cmd_vel);
             ROS_INFO("%f", dst);
@@ -71,8 +71,8 @@ int main(int argc, char **argv)
             cmd_vel.linear.x = 0;
             cmd_vel.linear.y = 0;
         }
-        
-       rate.sleep();
+
+        rate.sleep();
     }
 
     return 0;
