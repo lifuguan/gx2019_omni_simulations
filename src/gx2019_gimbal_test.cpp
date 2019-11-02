@@ -49,44 +49,44 @@ int main(int argc, char **argv)
     image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 10, imageCallback);
     arm_transport_pub = nh.advertise<gx2019_omni_simulations::arm_transport>("arm_transport", 1);
     namedWindow("OPENCV_WINDOW");
-    ros::Rate loop(5);
+    ros::Rate loop(10);
     int time = 1;
     while (nh.ok())
     {
-        double pixel_ = 0;
-        if (cX_ - (640 - 279.9) < 0)
+        if (time <= 30)
         {
-            pixel_ = cX_ - (640 - 279.9);
-        }
-        else
-        {
-            pixel_ = cX_ - (640 - 360.1);
-        }
-        double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
-        if (cX_ == 320)
-        {
-        }
-        // else if (abs(angular) <= 0.5)
-        // {
-        //     arm_transport.arm_moveit = true;
-        //     arm_transport.gimbal_rotate = 0;
-        //     arm_transport_pub.publish(arm_transport);
-        // }
-        else
-        {
-            if (time == 1)
+
+            double pixel_ = 0;
+            if (cX_ - (640 - 279.9) < 0)
+            {
+                pixel_ = cX_ - (640 - 279.9);
+            }
+            else
+            {
+                pixel_ = cX_ - (640 - 360.1);
+            }
+            double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
+            if (abs(cX_ - 320) <= 10)
+            {
+            }
+            else
             {
                 cout << "angular : " << angular << endl;
+                // 移动云台
                 arm_transport.arm_moveit = false;
-                arm_transport.gimbal_rotate = angular;
+                arm_transport.gimbal_rotate = 0.2 * angular;
                 arm_transport_pub.publish(arm_transport);
-
-                arm_transport.arm_moveit = true;
-                arm_transport.gimbal_rotate = 0;
-                arm_transport_pub.publish(arm_transport);
-                time += 1;
             }
+            time++;
         }
+        else
+        {
+            // 抓
+            arm_transport.arm_moveit = true;
+            arm_transport.gimbal_rotate = 0;
+            arm_transport_pub.publish(arm_transport);
+        }
+
         ros::spinOnce();
         loop.sleep();
     }
@@ -172,13 +172,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                     //表示图像重心
                     cX = int((M.m10 / M.m00));
                     cY = int((M.m01 / M.m00));
+                    cX_ = cX;
                 }
                 else
                 {
                     cX = cY = 0;
                 }
                 //画中位线
-                cv_mission_pub.publish(cv_mission_type);
+                //cv_mission_pub.publish(cv_mission_type);
                 line(frame, Point(frame.cols / 2, 0), Point(frame.cols / 2, frame.rows), (255, 255, 255), 2);
                 //画质心线
                 line(frame, Point(cX, cY), Point(0, cY), Scalar(255, 255, 255), 1);
@@ -190,9 +191,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                 drawLine(frame, shape, approx);                                                                                                             //画矩形
                 imshow("OPENCV_WINDOW", frame);
 
-                arm_transport.arm_moveit = false;
-                arm_transport.gimbal_rotate = cX;
-                arm_transport_pub.publish(arm_transport);
             } //画矩形
         }
         else

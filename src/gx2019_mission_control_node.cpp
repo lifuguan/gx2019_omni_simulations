@@ -123,6 +123,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -145,6 +146,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -168,6 +170,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -190,6 +193,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -213,6 +217,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -235,6 +240,7 @@ int main(int argc, char **argv)
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
+                    cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
             }
@@ -280,7 +286,7 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     rotation = yaw;
     dst = sqrt(pow(x, 2) + pow(y, 2));
     // 角速度
-    if (abs(roatation) <= 0.1)
+    if (abs(rotation) <= 0.1)
     {
         cmd_vel.angular.z = 0.0;        
     }

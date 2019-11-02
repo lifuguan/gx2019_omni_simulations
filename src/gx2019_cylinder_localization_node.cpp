@@ -45,6 +45,8 @@ enum TARGET_COLOR
     green
 };
 
+int cX_ = 320;
+
 // 获取图像的回调函数
 void imageCallback(const sensor_msgs::ImageConstPtr &msg);
 // 获取视觉任务的回调函数
@@ -70,42 +72,39 @@ int main(int argc, char **argv)
 
     namedWindow("OPENCV_WINDOW");
     ros::Rate loop(5);
-    int time = 1;
     while (nh.ok())
     {
-        double pixel_ = 0;
-        if (cX_ - (640 - 279.9) < 0)
+        // 追踪色块
+        if (cv_mission_type == 2)
         {
-            pixel_ = cX_ - (640 - 279.9);
-        }
-        else
-        {
-            pixel_ = cX_ - (640 - 360.1);
-        }
-        double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
-        if (cX_ == 320)
-        {
-        }
-        // else if (abs(angular) <= 0.5)
-        // {
-        //     arm_transport.arm_moveit = true;
-        //     arm_transport.gimbal_rotate = 0;
-        //     arm_transport_pub.publish(arm_transport);
-        // }
-        else
-        {
-            if (time == 1)
+            double pixel_ = 0;
+            if (cX_ - (640 - 279.9) < 0)
+            {
+                pixel_ = cX_ - (640 - 279.9);
+            }
+            else
+            {
+                pixel_ = cX_ - (640 - 360.1);
+            }
+            double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
+            if (abs(cX_ - 320) <= 10)
+            {
+            }
+            else
             {
                 cout << "angular : " << angular << endl;
+                // 移动云台
                 arm_transport.arm_moveit = false;
-                arm_transport.gimbal_rotate = angular;
+                arm_transport.gimbal_rotate = 0.2 * angular;
                 arm_transport_pub.publish(arm_transport);
-
-                arm_transport.arm_moveit = true;
-                arm_transport.gimbal_rotate = 0;
-                arm_transport_pub.publish(arm_transport);
-                time += 1;
             }
+        }
+        // 抓
+        else if (cv_mission_type == 3)
+        {            
+            arm_transport.arm_moveit = true;
+            arm_transport.gimbal_rotate = 0;
+            arm_transport_pub.publish(arm_transport);
         }
         ros::spinOnce();
         loop.sleep();
@@ -245,6 +244,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                         //表示图像重心
                         cX = int((M.m10 / M.m00));
                         cY = int((M.m01 / M.m00));
+                        cX_ = cX;
                     }
                     else
                     {
@@ -261,10 +261,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                     putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
                     drawLine(frame, shape, approx);                                                                                                             //画矩形
                     imshow("OPENCV_WINDOW", frame);
-
-                    arm_transport.arm_moveit = false;
-                    arm_transport.gimbal_rotate = cX;
-                    arm_transport_pub.publish(arm_transport);
                 }
             }
             else
