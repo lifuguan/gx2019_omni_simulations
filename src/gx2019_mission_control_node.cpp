@@ -133,16 +133,10 @@ int main(int argc, char **argv)
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][0] - 1], ros::Time::now(), "goal", "map"));
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
-                    cv_mission_type.cv_mission_type = 2;
-                    cv_mission_pub.publish(cv_mission_type);
-                }
-                // 抓物体
+                // 放物体
                 else if (dst <= 0.05)
                 {
-                    cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
@@ -180,16 +174,10 @@ int main(int argc, char **argv)
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][1] - 1], ros::Time::now(), "goal", "map"));
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
-                    cv_mission_type.cv_mission_type = 2;
-                    cv_mission_pub.publish(cv_mission_type);
-                }
-                // 抓物体
+                // 放物体
                 else if (dst <= 0.05)
                 {
-                    cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
@@ -227,16 +215,10 @@ int main(int argc, char **argv)
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][2] - 1], ros::Time::now(), "goal", "map"));
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
-                    cv_mission_type.cv_mission_type = 2;
-                    cv_mission_pub.publish(cv_mission_type);
-                }
-                // 抓物体
+                // 放物体
                 else if (dst <= 0.05)
                 {
-                    cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();

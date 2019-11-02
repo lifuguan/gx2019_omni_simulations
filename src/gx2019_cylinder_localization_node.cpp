@@ -94,6 +94,7 @@ int main(int argc, char **argv)
             {
                 cout << "angular : " << angular << endl;
                 // 移动云台
+                arm_transport.arm_release = false;
                 arm_transport.arm_moveit = false;
                 arm_transport.gimbal_rotate = 0.2 * angular;
                 arm_transport_pub.publish(arm_transport);
@@ -101,11 +102,21 @@ int main(int argc, char **argv)
         }
         // 抓
         else if (cv_mission_type == 3)
-        {            
+        {
             arm_transport.arm_moveit = true;
+            arm_transport.arm_release = false;
             arm_transport.gimbal_rotate = 0;
             arm_transport_pub.publish(arm_transport);
         }
+        // 放
+        else if (cv_mission_type == 4)
+        {
+            arm_transport.arm_release = true;
+            arm_transport.arm_moveit = false;
+            arm_transport.gimbal_rotate = 0;
+            arm_transport_pub.publish(arm_transport);
+        }
+
         ros::spinOnce();
         loop.sleep();
     }

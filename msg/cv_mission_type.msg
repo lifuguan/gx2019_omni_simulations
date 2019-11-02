@@ -7,6 +7,8 @@
 # 0 : do nothing
 # 1 : detect the material area
 # 2 : tracking the specific cylinder
+# 3 : grub the object
+# 4 : release the object 
 int32 cv_mission_type
 
 

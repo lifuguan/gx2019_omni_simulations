@@ -79,10 +79,19 @@ int main(int argc, char **argv)
             }
             time++;
         }
-        else
+        else if (time <= 60)
         {
             // 抓
             arm_transport.arm_moveit = true;
+            arm_transport.arm_release = false;
+            arm_transport.gimbal_rotate = 0;
+            arm_transport_pub.publish(arm_transport);
+            time++;
+        }
+        else
+        {
+            arm_transport.arm_release = true;
+            arm_transport.arm_moveit = false;
             arm_transport.gimbal_rotate = 0;
             arm_transport_pub.publish(arm_transport);
         }
