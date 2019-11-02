@@ -1,5 +1,7 @@
 {
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
-    "programmer": "AVR ISP"
+    "programmer": "AVR ISP",
+    "sketch": "src/base-controller/base-controller.ino",
+    "port": "/dev/ttyACM0"
 }
