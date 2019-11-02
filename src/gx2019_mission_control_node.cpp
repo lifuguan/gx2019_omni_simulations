@@ -134,7 +134,7 @@ int main(int argc, char **argv)
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
                 // 放物体
-                else if (dst <= 0.05)
+                if (dst <= 0.05)
                 {
                     cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
                 // 放物体
-                else if (dst <= 0.05)
+                if (dst <= 0.05)
                 {
                     cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
                 goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
                 double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
                 // 放物体
-                else if (dst <= 0.05)
+                if (dst <= 0.05)
                 {
                     cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
