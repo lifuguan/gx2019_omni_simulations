@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: lifuguan
  * @Date: 2019-10-03 15:21:38
- * @LastEditTime: 2019-10-27 00:07:00
+ * @LastEditTime: 2019-11-02 23:47:57
  * @LastEditors: Please set LastEditors
  */
 #include <iostream>
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
                 arm_transport.arm_moveit = false;
                 arm_transport.gimbal_rotate = angular;
                 arm_transport_pub.publish(arm_transport);
-            
+
                 arm_transport.arm_moveit = true;
                 arm_transport.gimbal_rotate = 0;
                 arm_transport_pub.publish(arm_transport);
@@ -163,29 +163,37 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
         {
             vector<Point> approx;
             string shape = detect(cnts_single, approx);
-            Moments M = moments(cnts_single);
-            int cX, cY;
-            if (M.m10 != 0)
+            if (shape == "rectangle" || shape == "sqaure")
             {
-                //表示图像重心
-                cX = int((M.m10 / M.m00));
-                cY = int((M.m01 / M.m00));
-                cX_ = cX;
-            }
-            else
-            {
-                cX = cY = 0;
-            }
-            //画中位线
-            line(frame, Point(frame.cols / 2, 0), Point(frame.cols / 2, frame.rows), (255, 255, 255), 2);
-            //画质心线
-            line(frame, Point(cX, cY), Point(0, cY), Scalar(255, 255, 255), 1);
-            line(frame, Point(cX, cY), Point(cX, 0), Scalar(255, 255, 255), 1);
+                Moments M = moments(cnts_single);
+                int cX, cY;
+                if (M.m10 != 0)
+                {
+                    //表示图像重心
+                    cX = int((M.m10 / M.m00));
+                    cY = int((M.m01 / M.m00));
+                }
+                else
+                {
+                    cX = cY = 0;
+                }
+                //画中位线
+                cv_mission_pub.publish(cv_mission_type);
+                line(frame, Point(frame.cols / 2, 0), Point(frame.cols / 2, frame.rows), (255, 255, 255), 2);
+                //画质心线
+                line(frame, Point(cX, cY), Point(0, cY), Scalar(255, 255, 255), 1);
+                line(frame, Point(cX, cY), Point(cX, 0), Scalar(255, 255, 255), 1);
 
-            putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
-            line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
-            putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
-            drawLine(frame, shape, approx);                                                                                                             //画矩形
+                putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
+                line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
+                putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
+                drawLine(frame, shape, approx);                                                                                                             //画矩形
+                imshow("OPENCV_WINDOW", frame);
+
+                arm_transport.arm_moveit = false;
+                arm_transport.gimbal_rotate = cX;
+                arm_transport_pub.publish(arm_transport);
+            } //画矩形
         }
         else
         {
