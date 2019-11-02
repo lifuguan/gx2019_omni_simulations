@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-10-26 19:55:28
- * @LastEditTime: 2019-10-27 15:23:48
+ * @LastEditTime: 2019-11-03 03:39:36
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /base-controller/base-controller.ino
@@ -452,7 +452,7 @@ double omg_in_arm_last = 0;
       shen_fang();
       delay(2000);
       shou();
-      delay(1000)
+      delay(1000);
       release_lock = 1;
    }
 
