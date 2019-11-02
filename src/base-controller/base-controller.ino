@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-10-26 19:55:28
- * @LastEditTime: 2019-11-02 23:11:50
+ * @LastEditTime: 2019-10-27 15:23:48
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /base-controller/base-controller.ino
@@ -78,7 +78,10 @@ ros::Subscriber<gx2019_omni_simulations::arm_transport> arm_transport_sub("arm_t
 ros::Subscriber<std_msgs::String> qrcode_message_sub("qrcode_message", qrcodeCallBack);
 
 std_msgs::Float32 float_msg;
-ros::Publisher chatter("chatter", &float_msg);
+ros::Publisher chatter1("chatter1", &float_msg);
+ros::Publisher chatter2("chatter2", &float_msg);
+ros::Publisher chatter3("chatter3", &float_msg);
+ros::Publisher chatter4("chatter4", &float_msg);
 
 geometry_msgs::Vector3 data;
 ros::Publisher pos("pos",&data);
@@ -122,7 +125,7 @@ public:
     // {
     //   myPID.SetTunings(4, 1.5, 0.05);
     // }
-    myPID.SetTunings(2, 0.4, 0.02);
+    myPID.SetTunings(1.6, 0.4, 0.01);
     if (SetPoint < 0)
     {
       if (status == 1)
@@ -231,8 +234,26 @@ public:
   }
   void test()
   {
+    if (status == 1)
+    {
     float_msg.data = (float)input_PID;
-    chatter.publish(&float_msg);
+    chatter1.publish(&float_msg);
+    }
+    else if (status == 2)
+    {
+    float_msg.data = (float)input_PID;
+    chatter2.publish(&float_msg);
+    }
+    else if (status == 3)
+    {
+    float_msg.data = (float)input_PID;
+    chatter3.publish(&float_msg);
+    }
+    else if (status == 4)
+    {
+    float_msg.data = (float)input_PID;
+    chatter4.publish(&float_msg);
+    }
     // Serial.println();
     // Serial.print(input_PID);
     // Serial.println("-input_PID");
@@ -378,17 +399,32 @@ void zero() //机械臂归零
   arm[2] = 135;
   arm[3] = 135;
   arm[5] = 135;
-  mxarm.moveServos(5, 1000, 10, atop(arm[0]), 11, atop(arm[1]), 12, atop(arm[2]), 13, atop(arm[3]), 15, atop(arm[5])); //归零
+  mxarm.moveServos(5, 2000, 10, atop(arm[0]), 11, atop(arm[1]), 12, atop(arm[2]), 13, atop(arm[3]), 15, atop(arm[5])); //归零
+  delay(3000);
   arm[0] = 145;
   arm[1] = 210;
   arm[2] = 190;
-  arm[3] = 155;
+  arm[3] = 185;
   arm[5] = 180;
   mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺(从左往右看)
   mxarm.moveServo(11, atop(arm[1]), 2000); //大后小前
   mxarm.moveServo(12, atop(arm[2]), 2000); //大逆小顺
   mxarm.moveServo(13, atop(arm[3]), 2000); //大逆小顺
   mxarm.moveServo(15, atop(arm[5]), 2000); //大开小合
+}
+
+void chushi()
+{
+  arm[0] = 235;
+  arm[1] = 210;
+  arm[2] = 190;
+  arm[3] = 185;
+  arm[5] = 180;
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺(从左往右看)
+  mxarm.moveServo(11, atop(arm[1]), 2000); //大后小前
+  mxarm.moveServo(12, atop(arm[2]), 2000); //大逆小顺
+  mxarm.moveServo(13, atop(arm[3]), 2000); //大逆小顺
+  mxarm.moveServo(15, atop(arm[5]), 2000); //大开小合 
 }
 
 double omg_in_arm_last = 0;
@@ -410,7 +446,7 @@ double omg_in_arm_last = 0;
      arm[0] -= omg_in_arm;
      omg_in_arm_last = omg_in_arm;
      float_msg.data = omg_in_arm;
-     chatter.publish(&float_msg);
+     //chatter.publish(&float_msg);
      if (arm[0] > 270)
      {
        arm[0] = 270;
@@ -436,13 +472,17 @@ void setup()
   b_c.initNode();
   b_c.subscribe(sub);
   b_c.subscribe(arm_transport_sub);
-  b_c.advertise(chatter);
+  b_c.advertise(chatter1);
+  b_c.advertise(chatter2);
+  b_c.advertise(chatter3);
+  b_c.advertise(chatter4);
   b_c.advertise(pos);
   //Serial.begin(9600);
   Serial2.begin(9600);
   lcd.begin(16, 2);
   pinMode(IN1_AL, OUTPUT);
   pinMode(IN2_AL, OUTPUT);
+  
   pinMode(IN3_AR, OUTPUT);
   pinMode(IN4_AR, OUTPUT);
 
@@ -461,7 +501,8 @@ void setup()
   digitalWrite(IN3_BR, LOW);
   digitalWrite(IN4_BR, HIGH);
 
-  zero();
+  chushi();
+
   lcd.print("hello world");
 
   attachInterrupt(digitalPinToInterrupt(left_front_wheel.hall), left_front_count, FALLING);
