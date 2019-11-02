@@ -15,8 +15,12 @@
 #include <gx2019_omni_simulations/arm_transport.h>
 #include <geometry_msgs/Vector3.h>
 #include <std_msgs/Float32.h>
+#include <LiquidCrystal.h>
 
 LobotServoController mxarm(Serial2);
+
+const int rs = 48, en = 46, d0 = 44, d1 = 42, d2 = 40, d3 = 38, d4 = 36, d5 = 34, d6 = 32, d7 = 30;
+LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
 int atop(int angle_in)
 {
@@ -39,6 +43,8 @@ double arm[6] = {0};
 long int longterm = 0; //长期控制的四轮平均值
 String vel_read_str = "";
 String omg_read_str = "";
+String qrcode_msg = "";
+String qrcode_msg_last = "";
 double vel_read = 0;
 double omg_read = 0;
 double vel_in_x = 0.0;
@@ -61,9 +67,15 @@ void armTransportCallback(const gx2019_omni_simulations::arm_transport &msg)
   arm_moveit = msg.arm_moveit;
 }
 
+void qrcodeCallBack(const std_msgs::String &qrcode_msg_)
+{
+  qrcode_msg = qrcode_msg_.data;
+}
+
 ros::NodeHandle b_c;
 ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel", velCallback);
 ros::Subscriber<gx2019_omni_simulations::arm_transport> arm_transport_sub("arm_transport", armTransportCallback);
+ros::Subscriber<std_msgs::String> qrcode_message_sub("qrcode_message", qrcodeCallBack);
 
 std_msgs::Float32 float_msg;
 ros::Publisher chatter("chatter", &float_msg);
@@ -110,7 +122,7 @@ public:
     // {
     //   myPID.SetTunings(4, 1.5, 0.05);
     // }
-    myPID.SetTunings(2, 0.15, 0.02);
+    myPID.SetTunings(2, 0.4, 0.02);
     if (SetPoint < 0)
     {
       if (status == 1)
@@ -219,8 +231,8 @@ public:
   }
   void test()
   {
-    //float_msg.data = (float)input_PID;
-    //chatter.publish(&float_msg);
+    float_msg.data = (float)input_PID;
+    chatter.publish(&float_msg);
     // Serial.println();
     // Serial.print(input_PID);
     // Serial.println("-input_PID");
@@ -380,35 +392,43 @@ void zero() //机械臂归零
 }
 
 double omg_in_arm_last = 0;
-void turn()
-{
-  if (arm_moveit == true)
-  {
-    shen_zhua();
-    delay(1400);
-    shou();
-    return;
-  }
+ void turn()
+ {
+   if (arm_moveit == true)
+   {
+     shen_zhua();
+     delay(1400);
+     shou();
+     return;
+   }
 
-  if (omg_in_arm == omg_in_arm_last)
-  {
-  }
-  else
-  {
-    arm[0] -= omg_in_arm;
-    omg_in_arm_last = omg_in_arm;
-    float_msg.data = omg_in_arm;
-    chatter.publish(&float_msg);
-    if (arm[0] > 270)
-    {
-      arm[0] = 270;
-    }
-    if (arm[0] < 0)
-    {
-      arm[0] = 0;
-    }
-    mxarm.moveServo(10, atop(arm[0]), 200);
-  }
+   if (omg_in_arm == omg_in_arm_last)
+   {
+   }
+   else
+   {
+     arm[0] -= omg_in_arm;
+     omg_in_arm_last = omg_in_arm;
+     float_msg.data = omg_in_arm;
+     chatter.publish(&float_msg);
+     if (arm[0] > 270)
+     {
+       arm[0] = 270;
+     }
+     if (arm[0] < 0)
+     {
+       arm[0] = 0;
+     }
+      mxarm.moveServo(10, atop(arm[0]), 200);
+   }
+ }
+
+void disp()
+{
+  lcd.clear();
+  lcd.print(qrcode_msg);
+  qrcode_msg = qrcode_msg_last;
+  qrcode_msg = "";
 }
 
 void setup()
@@ -420,6 +440,7 @@ void setup()
   b_c.advertise(pos);
   //Serial.begin(9600);
   Serial2.begin(9600);
+  lcd.begin(16, 2);
   pinMode(IN1_AL, OUTPUT);
   pinMode(IN2_AL, OUTPUT);
   pinMode(IN3_AR, OUTPUT);
@@ -441,10 +462,7 @@ void setup()
   digitalWrite(IN4_BR, HIGH);
 
   zero();
-  delay(3000);
-  shen_zhua();
-  delay(3000);
-  shou();
+  lcd.print("hello world");
 
   attachInterrupt(digitalPinToInterrupt(left_front_wheel.hall), left_front_count, FALLING);
   attachInterrupt(digitalPinToInterrupt(right_front_wheel.hall), right_front_count, FALLING);
@@ -460,12 +478,17 @@ void loop()
   // Serial.print("b_vel_in_x = ");
   // Serial.println(vel_in_x);
 
-  //turn();
+  turn();
 
+  if(qrcode_msg != qrcode_msg_last)
+  {
+    disp();  
+  }
+   
   right_front_wheel.vel_process_mecanum();
   right_front_wheel.SetPoint = right_front_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   right_front_wheel.pid_process();
-  //right_front_wheel.test();
+  right_front_wheel.test();
 
   left_front_wheel.vel_process_mecanum();
   left_front_wheel.SetPoint = left_front_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
@@ -475,10 +498,12 @@ void loop()
   left_back_wheel.vel_process_mecanum();
   left_back_wheel.SetPoint = left_back_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   left_back_wheel.pid_process();
+  left_back_wheel.test();
 
   right_back_wheel.vel_process_mecanum();
   right_back_wheel.SetPoint = right_back_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   right_back_wheel.pid_process();
+  right_back_wheel.test;
 
   data.x = (right_back_wheel.counter_rotation + right_front_wheel.counter_rotation) / 2;
   data.y = (left_back_wheel.counter_rotation + left_front_wheel.counter_rotation) / 2;
