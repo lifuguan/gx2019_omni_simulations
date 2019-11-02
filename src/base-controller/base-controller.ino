@@ -39,7 +39,8 @@ int IN3_BR = 35;
 int IN4_BR = 37; //对应控制左轮L298N模块-2 IN1/2/3/4,用于控制电机方向与启停
 int h = 12;
 int w = 19;
-int catch_lock = 0;
+bool catch_lock = false;
+bool release_lock = false;
 double arm[6] = {0};
 long int longterm = 0; //长期控制的四轮平均值
 String vel_read_str = "";
@@ -53,6 +54,7 @@ double vel_in_y = 0.0;
 double omg_in = 0.0;
 double omg_in_arm = 0.0;
 bool arm_moveit = false;
+bool arm_release = false;
 void test();
 
 void velCallback(const geometry_msgs::Twist &vel)
@@ -66,6 +68,7 @@ void armTransportCallback(const gx2019_omni_simulations::arm_transport &msg)
 {
   omg_in_arm = msg.gimbal_rotate;
   arm_moveit = msg.arm_moveit;
+  arm_release = msg.arm_release;
 }
 
 void qrcodeCallBack(const std_msgs::String &qrcode_msg_)
@@ -366,6 +369,7 @@ void shen_zhua() //伸机械臂抓物块
   delay(2200);
   arm[5] = 80;
   mxarm.moveServo(15, atop(arm[5]), 500);
+  release_lock = 0;
 }
 
 void shen_fang() //伸机械臂放物块
@@ -441,6 +445,15 @@ double omg_in_arm_last = 0;
      delay(2000);
      catch_lock = 1;
      return;
+   }
+
+   if (arm_release == true && release_lock == 0)
+   {
+      shen_fang();
+      delay(2000);
+      shou();
+      delay(1000)
+      release_lock = 1;
    }
 
    if (omg_in_arm == omg_in_arm_last)
