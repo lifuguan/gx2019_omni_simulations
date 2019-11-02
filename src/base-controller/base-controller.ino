@@ -490,6 +490,7 @@ void setup()
   b_c.initNode();
   b_c.subscribe(sub);
   b_c.subscribe(arm_transport_sub);
+  b_c.subscribe(qrcode_message_sub);
   b_c.advertise(chatter1);
   b_c.advertise(chatter2);
   b_c.advertise(chatter3);
