@@ -386,10 +386,11 @@ void shou() //收机械臂并保持爪子之前状态
   arm[1] = 210;
   arm[2] = 190;
   arm[3] = 155;
-  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
   mxarm.moveServo(11, atop(arm[1]), 2000); //大后小前
   mxarm.moveServo(12, atop(arm[2]), 3000); //大逆小顺
   mxarm.moveServo(13, atop(arm[3]), 3000); //大逆小顺
+  delay(2000);
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
 }
 
 void zero() //机械臂归零
@@ -436,6 +437,7 @@ double omg_in_arm_last = 0;
      shen_zhua();
      delay(1400);
      shou();
+     delay(2000);
      catch_lock = 1;
      return;
    }
