@@ -431,7 +431,7 @@ void chushi()
 double omg_in_arm_last = 0;
  void turn()
  {
-   if (arm_moveit == true && catch_lock = 0)
+   if (arm_moveit == true && catch_lock == 0)
    {
      shen_zhua();
      delay(1400);
