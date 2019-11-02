@@ -14,7 +14,7 @@
 using namespace std;
 geometry_msgs::Twist cmd_vel;
 
-tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1, -0.8, 0));
+tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1, 0.8, 0));
 
 int main(int argc, char **argv)
 {
@@ -25,12 +25,13 @@ int main(int argc, char **argv)
     tf::TransformListener goal_to_car_listener;
     tf::StampedTransform goal_to_car_stamped;
 
-    ros::Rate rate(5.0);
+    ros::Rate rate(10.0);
     while (nh.ok())
     {
 
         goal_frame_broadcaster.sendTransform(tf::StampedTransform(test_point, ros::Time::now(), "goal", "map"));
-
+        
+        
         //避免第一次订阅时翻车
         try
         {
@@ -42,19 +43,23 @@ int main(int argc, char **argv)
 
             double x, y, rotation, dst;
             x = -goal_to_car_stamped.getOrigin().y();
-            y = goal_to_car_stamped.getOrigin().x();
+            y = -goal_to_car_stamped.getOrigin().x();
             rotation = yaw;
             dst = sqrt(pow(x, 2) + pow(y, 2));
-            if (dst <= 0.02)
+            if (dst <= 0.1)
             {
                 cmd_vel.linear.x = 0;
                 cmd_vel.linear.y = 0;
                 cmd_vel.angular.z = 0;
+                ROS_INFO("vel: %f %f", cmd_vel.linear.x, cmd_vel.linear.y);
+
+                pub.publish(cmd_vel);
             }
             else
             {
-                cmd_vel.linear.x = 1 * tanh(dst) * (x / dst);
-                cmd_vel.linear.y = -1 * tanh(dst) * (y / dst);
+                cmd_vel.linear.x = 0.6 * tanh(dst) * (x / dst);
+                cmd_vel.linear.y = -0.6 * tanh(dst) * (y / dst);
+                ROS_INFO("vel: %f %f", cmd_vel.linear.x, cmd_vel.linear.y);
             }
             pub.publish(cmd_vel);
             ROS_INFO("%f", dst);
@@ -66,6 +71,8 @@ int main(int argc, char **argv)
             cmd_vel.linear.x = 0;
             cmd_vel.linear.y = 0;
         }
+        
+       rate.sleep();
     }
 
     return 0;
