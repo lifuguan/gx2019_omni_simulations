@@ -279,19 +279,25 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     y = goal_to_car_stamped.getOrigin().y();
     rotation = yaw;
     dst = sqrt(pow(x, 2) + pow(y, 2));
+    // 角速度
+    if (abs(roatation) <= 0.1)
+    {
+        cmd_vel.angular.z = 0.0;        
+    }
+    else
+    {
+        cmd_vel.angular.z = 0.5 * rotation;
+    }
+    // 线速度
     if (dst <= 0.1)
     {
         cmd_vel.linear.x = 0;
         cmd_vel.linear.y = 0;
-        cmd_vel.angular.z = 0;
     }
     else
     {
         cmd_vel.linear.x = 0.5 * tanh(dst) * (x / dst);
         cmd_vel.linear.y = 0.5 * tanh(dst) * (y / dst);
-        // camd_vel.angular.z = 0.5 * rotation;
-        cmd_vel.angular.z = 0.5 * rotation;
-        // cmd_vel.angular.z = atan2(x, y);
     }
 
     return dst;
