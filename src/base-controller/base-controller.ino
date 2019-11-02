@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-10-26 19:55:28
- * @LastEditTime: 2019-10-27 15:23:48
+ * @LastEditTime: 2019-11-02 23:11:50
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /base-controller/base-controller.ino
@@ -503,7 +503,7 @@ void loop()
   right_back_wheel.vel_process_mecanum();
   right_back_wheel.SetPoint = right_back_wheel.vel_out / (6.6 * 3.14) * 33; //填入的数字除以33即为转速/所需转速乘以33即为Setpoint_l
   right_back_wheel.pid_process();
-  right_back_wheel.test;
+  right_back_wheel.test();
 
   data.x = (right_back_wheel.counter_rotation + right_front_wheel.counter_rotation) / 2;
   data.y = (left_back_wheel.counter_rotation + left_front_wheel.counter_rotation) / 2;
