@@ -39,6 +39,7 @@ int IN3_BR = 35;
 int IN4_BR = 37; //对应控制左轮L298N模块-2 IN1/2/3/4,用于控制电机方向与启停
 int h = 12;
 int w = 19;
+int catch_lock = 0;
 double arm[6] = {0};
 long int longterm = 0; //长期控制的四轮平均值
 String vel_read_str = "";
@@ -430,11 +431,12 @@ void chushi()
 double omg_in_arm_last = 0;
  void turn()
  {
-   if (arm_moveit == true)
+   if (arm_moveit == true && catch_lock = 0)
    {
      shen_zhua();
      delay(1400);
      shou();
+     catch_lock = 1;
      return;
    }
 
@@ -456,6 +458,7 @@ double omg_in_arm_last = 0;
        arm[0] = 0;
      }
       mxarm.moveServo(10, atop(arm[0]), 200);
+      catch_lock = 0;
    }
  }
 
