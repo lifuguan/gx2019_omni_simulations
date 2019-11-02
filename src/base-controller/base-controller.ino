@@ -378,6 +378,7 @@ void shen_fang() //伸机械臂放物块
   delay(2200);
   arm[5] = 180;
   mxarm.moveServo(15, atop(arm[5]), 1000);
+  catch_lock  = 0;
 }
 
 void shou() //收机械臂并保持爪子之前状态
@@ -460,7 +461,6 @@ double omg_in_arm_last = 0;
        arm[0] = 0;
      }
       mxarm.moveServo(10, atop(arm[0]), 200);
-      catch_lock = 0;
    }
  }
 
