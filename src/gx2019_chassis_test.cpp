@@ -14,7 +14,7 @@
 using namespace std;
 geometry_msgs::Twist cmd_vel;
 
-tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-1.2, 0.8, 0));
+tf::Transform test_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(1.2, 0.8, 0));
 
 int main(int argc, char **argv)
 {

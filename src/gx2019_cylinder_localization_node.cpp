@@ -70,8 +70,7 @@ int main(int argc, char **argv)
     image_transport::ImageTransport it(nh);
     image_transport::Subscriber sub = it.subscribe(IMAGE_TOPIC, 1, imageCallback);
 
-    namedWindow("OPENCV_WINDOW");
-    ros::Rate loop(5);
+    ros::Rate loop(10);
     while (nh.ok())
     {
         // 追踪色块
@@ -88,7 +87,7 @@ int main(int argc, char **argv)
             }
             double angular = atan(pixel_ / 651.3) * 360 / (2 * M_PI);
             if (abs(cX_ - 320) <= 10)
-            {
+            { 
             }
             else
             {
@@ -137,13 +136,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
     {
         return;
     }
-    else if (cv_mission_type == 3)
-    {
-        arm_transport.arm_moveit = true;
-        arm_transport.gimbal_rotate = 0;
-        arm_transport_pub.publish(arm_transport);
-    }
-
     Mat frame_hsv, frame;
     try
     {
@@ -154,59 +146,60 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
         ROS_ERROR("%s", e.what());
         return;
     }
-
+    cout << cv_mission_type<<endl;
     // 识别物料区中色块的排列色块
     if (cv_mission_type == 1)
     {
-        // 图像格式切换
-        cvtColor(frame, frame_hsv, CV_BGR2HSV);
+    //     ROS_ERROR("DETECT");
+    //     // 图像格式切换
+    //     cvtColor(frame, frame_hsv, CV_BGR2HSV);
 
-        Mat red_frame, blue_frame, green_frame;
+    //     Mat red_frame, blue_frame, green_frame;
 
-        inRange(frame_hsv, red_range[0], red_range[1], red_frame);
-        inRange(frame_hsv, blue_range[0], blue_range[1], blue_frame);
-        inRange(frame_hsv, green_range[0], green_range[1], green_frame);
+    //     inRange(frame_hsv, red_range[0], red_range[1], red_frame);
+    //     inRange(frame_hsv, blue_range[0], blue_range[1], blue_frame);
+    //     inRange(frame_hsv, green_range[0], green_range[1], green_frame);
 
-        imshow("OPENCV_WINDOW", red_frame | blue_frame | green_frame);
+    //     // 获取不同颜色块的质点位置
+    //     int red_cX = findMaterialCentroid(red_frame);
+    //     int blue_cX = findMaterialCentroid(blue_frame);
+    //     int green_cX = findMaterialCentroid(green_frame);
 
-        // 获取不同颜色块的质点位置
-        int red_cX = findMaterialCentroid(red_frame);
-        int blue_cX = findMaterialCentroid(blue_frame);
-        int green_cX = findMaterialCentroid(green_frame);
+    //     ROS_INFO("%d %d %d", red_cX, blue_cX, green_cX);
 
-        gx2019_omni_simulations::cv_mission_type cv_material_queue;
-        // 排序
-        if (red_cX < blue_cX)
-        {
-            if (blue_cX < green_cX) // red < blue < green
-            {
-                cv_material_queue.material_queue = {0, 1, 2};
-            }
-            else if (green_cX < red_cX) // green < red < blue
-            {
-                cv_material_queue.material_queue = {2, 0, 1};
-            }
-            else // red < green < blue
-            {
-                cv_material_queue.material_queue = {0, 2, 1};
-            }
-        }
-        else if (blue_cX < red_cX)
-        {
-            if (red_cX < green_cX) // blue < red < green
-            {
-                cv_material_queue.material_queue = {1, 0, 2};
-            }
-            else if (green_cX < blue_cX) // green < blue < red
-            {
-                cv_material_queue.material_queue = {2, 1, 0};
-            }
-            else // blue < green < red
-            {
-                cv_material_queue.material_queue = {1, 2, 0};
-            }
-        }
-        cv_material_queue_pub.publish(cv_material_queue);
+    //     gx2019_omni_simulations::cv_mission_type cv_material_queue;
+    //     // 排序
+    //     if (red_cX < blue_cX)
+    //     {
+    //         if (blue_cX < green_cX) // red < blue < green
+    //         {
+    //             cv_material_queue.material_queue = {0, 1, 2};
+    //         }
+    //         else if (green_cX < red_cX) // green < red < blue
+    //         {
+    //             cv_material_queue.material_queue = {2, 0, 1};
+    //         }
+    //         else // red < green < blue
+    //         {
+    //             cv_material_queue.material_queue = {0, 2, 1};
+    //         }
+    //     }
+    //     else if (blue_cX < red_cX)
+    //     {
+    //         if (red_cX < green_cX) // blue < red < green
+    //         {
+    //             cv_material_queue.material_queue = {1, 0, 2};
+    //         }
+    //         else if (green_cX < blue_cX) // green < blue < red
+    //         {
+    //             cv_material_queue.material_queue = {2, 1, 0};
+    //         }
+    //         else // blue < green < red
+    //         {
+    //             cv_material_queue.material_queue = {1, 2, 0};
+    //         }
+    //     }
+    //     cv_material_queue_pub.publish(cv_material_queue);
     }
     // 抓取指定色块
     else if (cv_mission_type == 2)
@@ -242,12 +235,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
         for (int i = 0; i < cnts.size(); i++)
         {
             vector<Point> cnts_single = cnts[i]; //获取了上面一堆点中的一个点
-            if (cnts_single.size() > 50)
+            if (cnts_single.size() > 20)
             {
                 vector<Point> approx;
                 string shape = detect(cnts_single, approx);
-                if (shape == "rectangle" || shape == "sqaure")
-                {
+
                     Moments M = moments(cnts_single);
                     int cX, cY;
                     if (M.m10 != 0)
@@ -271,8 +263,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
                     line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
                     putText(frame, "position " + to_string(cX) + " , " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 1); //质心位置
                     drawLine(frame, shape, approx);                                                                                                             //画矩形
-                    imshow("OPENCV_WINDOW", frame);
-                }
+                
             }
             else
             {
@@ -364,17 +355,20 @@ int findMaterialCentroid(Mat target_frame)
     {
         vector<Point> approx;
         string shape = detect(cnts_single, approx);
-        Moments M = moments(cnts_single);
-
-        if (M.m10 != 0)
+        if (shape == "rectangle" || shape == "square")
         {
-            //表示图像重心
-            cX = int((M.m10 / M.m00));
-        }
-        else
-        {
-            cX = 0;
+            Moments M = moments(cnts_single);
+            ROS_ERROR("IN FUNCTION");
+            if (M.m10 != 0)
+            {
+                //表示图像重心
+                return int((M.m10 / M.m00));
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
-    return cX;
+    
 }

@@ -5,6 +5,8 @@
  * @LastEditTime: 2019-10-18 20:22:39
  * @LastEditors: Please set LastEditors
  */
+ #include <iostream>
+
 #include <visp3/core/vpPixelMeterConversion.h>
 #include <visp3/detection/vpDetectorQRCode.h>
 #include <visp3/gui/vpDisplayGDI.h>
@@ -23,6 +25,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+using namespace std;
 using namespace cv;
 static const std::string IMAGE_TOPIC = "/usb_cam/image_raw";
 Mat frame;
@@ -113,6 +116,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr &msg)
         vpRect bbox = detector.getBBox(i);
         std_msgs::String msg;
         msg.data = detector.getMessage(i);
+        cout << msg.data << endl;
         pub.publish(msg);
         abort_control = true;
 

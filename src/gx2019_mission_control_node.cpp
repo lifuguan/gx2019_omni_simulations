@@ -20,20 +20,21 @@ using namespace std;
 tf::Transform goals[3][4] =
     {
         // 成品区 从右往左
-        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.2, 0)), // 红
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.5, 0)), // 绿
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.8, 0))},// 蓝
+        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.2, 0)),  // 红
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.5, 0)),  // 绿
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-2.1, -1.8, 0))}, // 蓝
         // 加工区 从左到右
-        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.2, -1.8, 0)), // 红
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.2, -1.5, 0)), // 绿
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.2, -1.2, 0))},// 蓝
+        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.4, -1.8, 0)),  // 红
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.4, -1.5, 0)),  // 绿
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.4, -1.2, 0))}, // 蓝
         // 物料区 从下到上
-        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.35, -0.3, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.20, -0.3, 0)),
-         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.05, -0.3, 0))}};
+        {tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.35, -0.4, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.20, -0.4, 0)),
+         tf::Transform(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.05, -0.4, 0))}};
 
 tf::Transform inital_point(tf::Quaternion(0, 0, 0, 1), tf::Vector3(-0.2, -0.2, 0));
-tf::Transform qrcode_point(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.2, 0.8, 0));
+tf::Transform qrcode_point(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-1.8, -0.6, 0));
+tf::Transform qrcode_point_(tf::Quaternion(0, 0, 0.0, 1), tf::Vector3(-0.9, -0.7, 0));
 
 int qrcode_message[2][4] = {0};
 
@@ -63,24 +64,19 @@ int main(int argc, char **argv)
     tf::StampedTransform goal_to_car_stamped;
 
     gx2019_omni_simulations::cv_mission_type cv_mission_type;
-
-    ros::Rate rate(5.0);
+    int init_ = 1;
+    ros::Rate rate(10.0);
     while (nh.ok())
     {
         // 识别到二维码之前（正在前往）
         if (qrcode_message[0][0] == 0)
         {
-            goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "goal", "map"));
-
             //避免第一次订阅时翻车
             try
             {
-                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
 
-                double dst = cmdVelCalculate(goal_to_car_stamped);
-                ROS_INFO("%f", dst);
                 // 如果没有达到目标距离 / 没有收到队列信息
-                if (dst <= 0.7 && dst >= 0.5 && check_if_mission_reviced == false)
+                if (check_if_mission_reviced == false)
                 {
                     // 通讯， 打开识别
                     cv_mission_type.cv_mission_type = 1;
@@ -90,6 +86,13 @@ int main(int argc, char **argv)
                     // 啥都不做
                     cv_mission_type.cv_mission_type = 0;
                 }
+                goal_frame_broadcaster.sendTransform(tf::StampedTransform(qrcode_point, ros::Time::now(), "goal", "map"));
+
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst);
+
                 cv_mission_pub.publish(cv_mission_type);
             }
             catch (tf::TransformException &ex)
@@ -107,19 +110,27 @@ int main(int argc, char **argv)
             if (step == 0)
             {
                 // [qrcode_message[0][0] - 1] 要搬运的色块
-                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][0] - 1]], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
-                    cv_mission_type.cv_mission_type = 2;
-                    cv_mission_pub.publish(cv_mission_type);
-                }
+                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][qrcode_message[0][0] - 1], ros::Time::now(), "goal", "map"));
+                ros::Duration(0.1).sleep();
+
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst);
+
                 // 抓物体
-                else if (dst <= 0.05)
+                if (dst <= 0.1)
                 {
+                    cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
+                    pub.publish(cmd_vel);
+
+                    cv_mission_type.cv_mission_type = 2;
+                    cv_mission_type.cv_target_color = qrcode_message[0][0] - 1;
+                    cv_mission_pub.publish(cv_mission_type);
+                    ros::Duration(4).sleep();
                     cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_target_color = 233;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
@@ -131,12 +142,20 @@ int main(int argc, char **argv)
             else if (step == 1)
             {
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][0] - 1], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
+                ros::Duration(0.1).sleep();
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst);
                 // 放物体
                 if (dst <= 0.05)
                 {
+                    cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
+                    pub.publish(cmd_vel);
+
                     cv_mission_type.cv_mission_type = 4;
+                    cv_mission_type.cv_target_color = qrcode_message[0][0] - 1;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
@@ -147,20 +166,28 @@ int main(int argc, char **argv)
             // 从物料区抓第二个色块
             else if (step == 2)
             {
-                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][1] - 1]], ros::Time::now(), "goal", "map"));
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][qrcode_message[0][1] - 1], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
-                    cv_mission_type.cv_mission_type = 2;
-                    cv_mission_pub.publish(cv_mission_type);
-                }
+                ros::Duration(0.1).sleep();
+
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst); // 开启跟踪
+
                 // 抓物体
-                else if (dst <= 0.05)
+                if (dst <= 0.1)
                 {
+                    cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
+                    pub.publish(cmd_vel);
+
+                    cv_mission_type.cv_mission_type = 2;
+                    cv_mission_type.cv_target_color = qrcode_message[0][1] - 1;
+                    cv_mission_pub.publish(cv_mission_type);
+                    ros::Duration(4).sleep();
                     cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_target_color = 233;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
@@ -172,15 +199,22 @@ int main(int argc, char **argv)
             else if (step == 3)
             {
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][1] - 1], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 放物体
+                ros::Duration(0.1).sleep();
+
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst); // 放物体
                 if (dst <= 0.05)
                 {
+                    cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
+                    pub.publish(cmd_vel);
+
                     cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
-                    ros::Duration(5).sleep();
+                    ros::Duration(6).sleep();
                     cv_mission_type.cv_mission_type = 0;
                     step += 1;
                 }
@@ -188,36 +222,39 @@ int main(int argc, char **argv)
             // 从物料区抓第三个色块
             else if (step == 4)
             {
-                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][material_queue[qrcode_message[0][2] - 1]], ros::Time::now(), "goal", "map"));
-                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][qrcode_message[0][1] - 1], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 开启跟踪
-                if (dst <= 0.5 && dst >= 0.05)
-                {
+                goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[2][qrcode_message[0][2] - 1], ros::Time::now(), "goal", "map"));
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst); // 开启跟踪
+                cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
+                    pub.publish(cmd_vel);
+
                     cv_mission_type.cv_mission_type = 2;
+                    cv_mission_type.cv_target_color = qrcode_message[0][2] - 1;
                     cv_mission_pub.publish(cv_mission_type);
-                }
-                // 抓物体
-                else if (dst <= 0.05)
-                {
+                    ros::Duration(4).sleep();
                     cv_mission_type.cv_mission_type = 3;
+                    cv_mission_type.cv_target_color = 233;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
                     ros::Duration(5).sleep();
                     cv_mission_type.cv_mission_type = 0;
                     step += 1;
-                }
             }
             // 去加工区放第三个色块
             else if (step == 5)
             {
                 goal_frame_broadcaster.sendTransform(tf::StampedTransform(goals[1][qrcode_message[0][2] - 1], ros::Time::now(), "goal", "map"));
-                goal_to_car_listener.lookupTransform("goal", "base_link", ros::Time(0), goal_to_car_stamped);
-                double dst = sqrt(pow(goal_to_car_stamped.getOrigin().x(), 2) + pow(goal_to_car_stamped.getOrigin().y(), 2));
-                // 放物体
+                goal_to_car_listener.lookupTransform("base_link", "goal", ros::Time(0), goal_to_car_stamped);
+                double dst = cmdVelCalculate(goal_to_car_stamped);
+                ROS_INFO("%f", dst); // 放物体
                 if (dst <= 0.05)
                 {
+                    cmd_vel.linear.x = 0;
+                    cmd_vel.linear.y = 0;
+                    cmd_vel.angular.z = 0;
                     cv_mission_type.cv_mission_type = 4;
                     cv_mission_pub.publish(cv_mission_type);
                     // 延时5s，视情况而定，机械臂抓取物体
@@ -228,7 +265,7 @@ int main(int argc, char **argv)
             }
             cmdVelCalculate(goal_to_car_stamped);
         }
-
+        cout << "step: " << step << "  cv_mission_type: " << cv_mission_type.cv_mission_type << endl;
         pub.publish(cmd_vel);
         ros::spinOnce();
         rate.sleep();
@@ -268,13 +305,13 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     rotation = yaw;
     dst = sqrt(pow(x, 2) + pow(y, 2));
     // 角速度
-    if (abs(rotation) <= 0.1)
+    if (abs(rotation) <= 0.01)
     {
-        cmd_vel.angular.z = 0.0;        
+        cmd_vel.angular.z = 0.0;
     }
     else
     {
-        cmd_vel.angular.z = 0.5 * rotation;
+        cmd_vel.angular.z = 0.8 * rotation;
     }
     // 线速度
     if (dst <= 0.1)
@@ -284,9 +321,9 @@ double cmdVelCalculate(tf::StampedTransform goal_to_car_stamped)
     }
     else
     {
-        cmd_vel.linear.x = 0.5 * tanh(dst) * (x / dst);
-        cmd_vel.linear.y = 0.5 * tanh(dst) * (y / dst);
+        cmd_vel.linear.x = 0.8 * tanh(dst) * (x / dst);
+        cmd_vel.linear.y = 1.2 * tanh(dst) * (y / dst);
     }
-
+    //ROS_INFO("%f %f", cmd_vel.linear.x , cmd_vel.linear.y);
     return dst;
 }

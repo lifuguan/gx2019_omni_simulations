@@ -4,7 +4,7 @@
   <arg name="initial_pose_x" default="0.2"/>
   <arg name="initial_pose_y" default="0.2"/>
   <arg name="initial_pose_a" default="0.0"/>
-  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map.yaml"/>
+  <arg name="map_file" default="$(find gx2019_omni_simulations)/map/map_remote.yaml"/>
 
   <!-- AMCL -->
   <node pkg="amcl" type="amcl" name="amcl">

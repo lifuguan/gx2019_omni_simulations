@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="gx2019_omni_simulations" name="gx2019_mission_control_node" type="gx2019_mission_control_node"/>
+  <node pkg="gx2019_omni_simulations" name="qrcode_detecter" type="qrcode_detecter"/>
+  <node pkg="gx2019_omni_simulations" name="gx2019_cylinder_localization_node" type="gx2019_cylinder_localization_node"/>
+</launch>
