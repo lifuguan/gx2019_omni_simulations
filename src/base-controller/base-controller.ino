@@ -39,6 +39,7 @@ int IN3_BR = 35;
 int IN4_BR = 37; //对应控制左轮L298N模块-2 IN1/2/3/4,用于控制电机方向与启停
 int h = 12;
 int w = 19;
+int catch_times = 0;
 bool catch_lock = false;
 bool release_lock = false;
 double arm[6] = {0};
@@ -398,6 +399,24 @@ void shou() //收机械臂并保持爪子之前状态
   mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
 }
 
+void qian()
+{
+  arm[0] = 235;
+   mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
+void you()
+{
+  arm[0] = 145;
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
+void hou()
+{
+  arm[0] = 55;
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
 void zero() //机械臂归零
 {
 
@@ -443,6 +462,7 @@ double omg_in_arm_last = 0;
      delay(1400);
      shou();
      delay(2000);
+     hou();
      catch_lock = 1;
      return;
    }
@@ -452,8 +472,10 @@ double omg_in_arm_last = 0;
       shen_fang();
       delay(2000);
       shou();
-      delay(1000)
+      delay(1000);
+      you();
       release_lock = 1;
+      return;
    }
 
    if (omg_in_arm == omg_in_arm_last)
@@ -521,6 +543,8 @@ void setup()
   digitalWrite(IN4_BR, HIGH);
 
   chushi();
+  delay(2000);
+  you();
 
   lcd.print("hello world");
 
