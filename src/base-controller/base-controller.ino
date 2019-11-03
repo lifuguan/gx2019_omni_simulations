@@ -362,6 +362,10 @@ void get_velomg() //此处程序为遥控车用,读取串口2收到的速度与�
 
 void shen_zhua() //伸机械臂抓物块
 {
+  left_back_wheel.SetPoint = 0;
+  right_back_wheel.SetPoint = 0;
+  right_front_wheel.SetPoint = 0;
+  left_front_wheel.SetPoint  = 0;
   arm[1] = 135 - 90;
   arm[2] = 135 - 42;
   arm[3] = 135 - 50;
@@ -375,6 +379,11 @@ void shen_zhua() //伸机械臂抓物块
 
 void shen_fang() //伸机械臂放物块
 {
+  left_back_wheel.SetPoint = 0;
+  right_back_wheel.SetPoint = 0;
+  right_front_wheel.SetPoint = 0;
+  left_front_wheel.SetPoint  = 0;
+
   arm[1] = 135 - 90;
   arm[2] = 135 - 42;
   arm[3] = 135 - 50;
@@ -483,6 +492,10 @@ double omg_in_arm_last = 0;
    }
    else
    {
+     left_back_wheel.SetPoint = 0;
+    right_back_wheel.SetPoint = 0;
+  right_front_wheel.SetPoint = 0;
+  left_front_wheel.SetPoint  = 0;
      arm[0] -= omg_in_arm;
      omg_in_arm_last = omg_in_arm;
      float_msg.data = omg_in_arm;
