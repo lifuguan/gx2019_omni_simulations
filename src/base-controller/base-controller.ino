@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-10-26 19:55:28
- * @LastEditTime: 2019-11-03 03:39:36
+ * @LastEditTime: 2019-10-27 15:23:48
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /base-controller/base-controller.ino
@@ -398,6 +398,24 @@ void shou() //收机械臂并保持爪子之前状态
   mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
 }
 
+void qian()
+{
+  arm[0] = 235;
+   mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
+void you()
+{
+  arm[0] = 145;
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
+void hou()
+{
+  arm[0] = 55;
+  mxarm.moveServo(10, atop(arm[0]), 2000); //大逆小顺
+}
+
 void zero() //机械臂归零
 {
 
@@ -521,6 +539,8 @@ void setup()
   digitalWrite(IN4_BR, HIGH);
 
   chushi();
+  delay(2000);
+  you();
 
   lcd.print("hello world");
 
